@@ -1,12 +1,40 @@
 import requests
 import json
-import unittest
 import os
+import unittest
+from jikanpy import Jikan
+
+
 
 #Project Members: SoJung Ham, Dylan Yono
 #Information: 
 
+def get_data():
+    """
+    This function takes a country code (e.g. USA, BRA) and year (e.g. 2004).
+    Call the World Bank API to get population data searched by country and year.
+    Return the data from API after converting to a python list
+    that has population related information.
+    Once you receive data from the API, paste the data to 
+    JSON Online Editor and look at the contents.
 
+    params = str(lat)
+     """
+    try:
+        url = "http://api.jikan.moe/v3/anime/1/stats"
+        r = requests.get(url)
+        myDict = json.loads(r.text)
+        # pp = pprint.PrettyPrinter(indent=4)
+        # pp.pprint(myDict)
+        
+    except:
+        print("error when reading from url")
+        myDict = {}
+
+    return myDict 
+
+shirt = get_data()
+print(shirt)
 # def read_cache(CACHE_FNAME):
 #     """
 #     This function reads from the JSON cache file and returns a dictionary from the cache data. 
