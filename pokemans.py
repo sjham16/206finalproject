@@ -22,17 +22,23 @@ def get_pokemon_data():
     params = str(lat)
      """
     try:
-        url = "http://pokeapi.co/api/v2/"
+        url = "https://pokeapi.co/api/v2/pokemon/1/"
         r = requests.get(url)
         myDict = json.loads(r.text)
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(myDict)
-        
+        #getting stats is 
     except:
         print("error when reading from url")
         myDict = {}
 
     return myDict 
 
-shirt = get_pokemon_data()
+shirt = get_pokemon_data()['stats']
 print(shirt)
+
+
+# conn = sqlite3.connect('pokemon.sqlite')
+# cur = conn.cursor()
+
+# cur.execute('''CREATE TABLE IF NOT EXISTS Pokemon (id INTEGER PRIMARY KEY, name UNIQUE, type STRING))
