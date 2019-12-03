@@ -37,8 +37,14 @@ def get_pokemon_data():
 shirt = get_pokemon_data()['stats']
 print(shirt)
 
+#Fun table stuff
+conn = sqlite3.connect('pokemon.sqlite')
+cur = conn.cursor()
 
-# conn = sqlite3.connect('pokemon.sqlite')
-# cur = conn.cursor()
+cur.execute('''CREATE TABLE IF NOT EXISTS Pokemon (id INTEGER PRIMARY KEY, 
+                                                    speed INTEGER, special-defense INTEGER, special-attack INTEGER, 
+                                                    attack INTEGER, hp INTEGER, , type STRING))''')
 
-# cur.execute('''CREATE TABLE IF NOT EXISTS Pokemon (id INTEGER PRIMARY KEY, name UNIQUE, type STRING))
+#create a cache of the first 151 pokemon
+#get all of their stats in a nice table
+# calculate the average of each typing 
