@@ -35,6 +35,12 @@ def get_data():
 
 shirt = get_data()
 print(shirt)
+
+url = "https://kitsu.io/api/edge/anime/1"
+r = requests.get(url)
+myDict = json.loads(r.text)
+print(myDict)
+
 # def read_cache(CACHE_FNAME):
 #     """
 #     This function reads from the JSON cache file and returns a dictionary from the cache data. 
