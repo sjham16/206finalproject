@@ -9,7 +9,7 @@ from jikanpy import Jikan
 #Project Members: SoJung Ham, Dylan Yono
 #Information: 
 
-def get_data():
+def get_jikan_data():
     """
     This function takes a country code (e.g. USA, BRA) and year (e.g. 2004).
     Call the World Bank API to get population data searched by country and year.
@@ -33,13 +33,24 @@ def get_data():
 
     return myDict 
 
-shirt = get_data()
+shirt = get_jikan_data()
 print(shirt)
 
-url = "https://kitsu.io/api/edge/anime/1"
-r = requests.get(url)
-myDict = json.loads(r.text)
-print(myDict)
+
+def get_kitsu_data():
+    try:
+        url = "https://kitsu.io/api/edge/anime/1/"
+        r = requests.get(url)
+        myDict = json.loads(r.text)
+    except:
+        print("error when reading from url")
+        myDict = {}
+    return myDict
+    
+pants = get_kitsu_data()
+print(pants)
+
+
 
 # def read_cache(CACHE_FNAME):
 #     """
