@@ -60,10 +60,11 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     cur.execute('''CREATE TABLE Pokemon (pokemon_id INTEGER, 
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER)''')
-    info = pokemon_data#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    info = pokemon_data.values()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    for _ in info:
+    for pokemon in info:
          
+
 
         _pokemon_id = info['id']
         _speed = info['stats'][0]['base_stat']
