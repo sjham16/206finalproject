@@ -127,13 +127,12 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     cur.execute('''CREATE TABLE Pokemon (pokemon_id INTEGER, 
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER)''')
-    info = pokemon_data.values()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    info = list(pokemon_data.values())#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     for pokemon in info:
          
-
-
         _pokemon_id = info['id']
+        #something here....list indices not string but its a dictionary..??
         _speed = info['stats'][0]['base_stat']
         _special_defense = info['stats'][1]['base_stat']
         _special_attack = info['stats'][2]['base_stat']
@@ -147,9 +146,9 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 # get all of their stats in a nice table
 # calculate the average of each typing 
 
-pokemon_data = get_pokemon_data()
+pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('Pokemon.db')
-# setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
-get_data_with_caching()
+setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+
 
 
