@@ -10,8 +10,9 @@ import pokepy
 
 
 #Project Members: SoJung Ham, Dylan Yono
-#Information: 
-
+#Information:  This program creates a database of stats of all Gen 1 Pokemon, which includes base speed, special defense, special attack
+#               defense, attack, and HP. We will calculate the average base stats for typings of Pokemon (fire, water, grass).
+                #example: Which Pokemon type has the highest attack stat on average?
 
 
 def setUpDatabase(db_name):
@@ -38,12 +39,7 @@ def get_pokemon_data():
             info = json.loads(r.text)
             myDict[number] =  info
             number += 1
-                #need to find a way to append these into one dictinoary....
-                
-            
-        # pp = pprint.PrettyPrinter(indent=4)
-        # pp.pprint(myDict)
-        #getting stats is 
+               
     except:
         print("error when reading from url")
         myDict = {}
@@ -119,7 +115,6 @@ def get_data_with_caching():
         print("Exception")
         return None
 
-
 #Fun table stuff
 def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     
@@ -142,13 +137,12 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 
         cur.execute('INSERT INTO Pokemon (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
     conn.commit()
-# create a cache of the first 151 pokemon
-# get all of their stats in a nice table
-# calculate the average of each typing 
 
-pokemon_data = get_data_with_caching()
-cur, conn = setUpDatabase('Pokemon.db')
-setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+def main():
+
+    pokemon_data = get_data_with_caching()
+    cur, conn = setUpDatabase('Pokemon.db')
+    setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
 
 
 
