@@ -127,18 +127,18 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     cur.execute('''CREATE TABLE Pokemon (pokemon_id INTEGER, 
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER)''')
-    info = list(pokemon_data.values())#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     for pokemon in info:
          
-        _pokemon_id = info['id']
+        _pokemon_id = pokemon[1]['id']
         #something here....list indices not string but its a dictionary..??
-        _speed = info['stats'][0]['base_stat']
-        _special_defense = info['stats'][1]['base_stat']
-        _special_attack = info['stats'][2]['base_stat']
-        _defense = info['stats'][3]['base_stat']  
-        _attack = info['stats'][4]['base_stat'] 
-        _hp = info['stats'][5]['base_stat'] 
+        _speed = pokemon[1]['stats'][0]['base_stat']
+        _special_defense = pokemon[1]['stats'][1]['base_stat']
+        _special_attack = pokemon[1]['stats'][2]['base_stat']
+        _defense = pokemon[1]['stats'][3]['base_stat']  
+        _attack = pokemon[1]['stats'][4]['base_stat'] 
+        _hp = pokemon[1]['stats'][5]['base_stat'] 
 
         cur.execute('INSERT INTO Pokemon (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
     conn.commit()
