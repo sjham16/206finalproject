@@ -22,9 +22,15 @@ def setUpDatabase(db_name):
 def get_pokemon_data():
 
     try:
-        url = "https://pokeapi.co/api/v2/pokemon/1" #probably need to limit this to 151 pokemon only
-        r = requests.get(url)
-        myDict = json.loads(r.text)
+
+        number = 1
+        for x in range(10):
+            base_url = "https://pokeapi.co/api/v2/pokemon/{}" #probably need to limit this to 151 pokemon only
+            url = base_url.format(number)
+        
+            r = requests.get(url)
+            myDict = json.loads(r.text)
+            number += 1
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(myDict)
         #getting stats is 
