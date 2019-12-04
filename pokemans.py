@@ -136,11 +136,31 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
         cur.execute('INSERT INTO Pokemon (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
     conn.commit()
 
+def setUpPokemonTypeTable(pokemon_data, cur, conn):
+
+    cur.execute("DROP TABLE IF EXISTS PokemonTypes")
+    cur.execute('''CREATE TABLE PokemonTypes (pokemon_id INTEGER, 
+                                        type_1 STRING, type_2 STRING)''')
+    info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    for pokemon in info:
+         
+        _pokemon_id = pokemon[1]['id']
+        _type_1 = pokemon[1]['types'][0]['type']['name']
+        _type_2 = ""
+        if len(pokemon[1]['types']) == 2:
+            _type_2 = pokemon[1]['types'][1]['type']['name']
+
+        cur.execute('INSERT INTO PokemonTypes (pokemon_id, type_1, type_2) VALUES(?, ?, ?)', (_pokemon_id, _type_1, _type_2))
+    conn.commit()
+    
 
 
 pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('Pokemon.db')
 setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+cur, conn = setUpDatabase('PokemonTypes.db')
+setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 
 
