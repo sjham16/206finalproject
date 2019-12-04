@@ -4,6 +4,7 @@ import os
 import unittest
 import pokebase as pb
 import sqlite3
+import pokepy
 
 
 
@@ -20,17 +21,26 @@ def setUpDatabase(db_name):
     return cur, conn
 
 def get_pokemon_data():
-
+    #SOMETHING TO FIX HERE 
     try:
 
-        number = 1
-        for x in range(10):
-            base_url = "https://pokeapi.co/api/v2/pokemon/{}" #probably need to limit this to 151 pokemon only
-            url = base_url.format(number)
+        base_url = "https://pokeapi.co/api/v2/pokemon/?limit=10" #probably need to limit this to 151 pokemon only
+        myDict = {}
         
+            #getting each pokemon's unique URL 
+        ugh = requests.get(base_url)
+        all_pokemon = json.loads(ugh.text)
+
+        number = 1
+        for x in all_pokemon['results']:
+            url = x["url"]
             r = requests.get(url)
-            myDict = json.loads(r.text)
+            info = json.loads(r.text)
+            myDict[number] =  info
             number += 1
+                #need to find a way to append these into one dictinoary....
+                
+            
         # pp = pprint.PrettyPrinter(indent=4)
         # pp.pprint(myDict)
         #getting stats is 
@@ -50,9 +60,11 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     cur.execute('''CREATE TABLE Pokemon (pokemon_id INTEGER, 
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER)''')
-    info = pokemon_data
+    info = pokemon_data.values() #why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     for _ in info:
+         
+
         _pokemon_id = info['id']
         _speed = info['stats'][0]['base_stat']
         _special_defense = info['stats'][1]['base_stat']
