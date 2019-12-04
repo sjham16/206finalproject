@@ -1,10 +1,8 @@
 import requests
 import json
 import os
-import unittest
-import pokebase as pb
 import sqlite3
-import pokepy
+
 
 
 
@@ -138,11 +136,11 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
         cur.execute('INSERT INTO Pokemon (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
     conn.commit()
 
-def main():
 
-    pokemon_data = get_data_with_caching()
-    cur, conn = setUpDatabase('Pokemon.db')
-    setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+
+pokemon_data = get_data_with_caching()
+cur, conn = setUpDatabase('Pokemon.db')
+setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
 
 
 
