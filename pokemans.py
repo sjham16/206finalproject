@@ -15,8 +15,6 @@ import pokepy
 
 
 def setUpDatabase(db_name):
-    
-
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
 
@@ -78,15 +76,9 @@ def write_cache(cache_file, cache_dict):
     fw.write(dumped_json_cache) #write the json into the cache 
     fw.close() #close the filw 
     
-
-
 def get_data_with_caching():
-    """
 
-    """
-    
     request_url = "https://pokeapi.co/api/v2/pokemon/?limit=10"
-    
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -99,24 +91,33 @@ def get_data_with_caching():
             #uhhhhhhhhhhhhhhhhhhh
             return CACHE_DICTION[request_url]
         
-
         #exception
         
-        else: #if request_url does not exist in CACHE_DICTION
+        else: #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
         
             print("Fetching")
-            r = requests.get(request_url)
-            myDict = json.loads(r.text)
+            ugh = requests.get(request_url)
+            all_pokemon = json.loads(ugh.text)
+
+            myDict = {}
+                     
+            number = 1
+            for x in all_pokemon['results']:
+                url = x["url"]
+                r = requests.get(url)
+                info = json.loads(r.text)
+                myDict[number] =  info
+                number += 1
+            
+            
             
             CACHE_DICTION[request_url] = myDict
-                
                 #write out the dictionary to a file using the function write_cache   
             write_cache(CACHE_FNAME, CACHE_DICTION)
             return myDict
     except:
         print("Exception")
         return None
-
 
 
 #Fun table stuff
