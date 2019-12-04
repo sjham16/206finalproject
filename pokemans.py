@@ -12,6 +12,8 @@ import pokepy
 #Project Members: SoJung Ham, Dylan Yono
 #Information: 
 
+
+
 def setUpDatabase(db_name):
     
 
@@ -50,6 +52,70 @@ def get_pokemon_data():
 
     return myDict 
     
+def read_cache(CACHE_FNAME):
+    """
+    This function reads from the JSON cache file and returns a dictionary from the cache data. 
+    If the file doesn’t exist, it returns an empty dictionary.
+    """
+
+    try:
+        cache_file = open(CACHE_FNAME, 'r', encoding="utf-8") # Try to read the data from the file
+        cache_contents = cache_file.read()  # If it's there, get it into a string
+        CACHE_DICTION = json.loads(cache_contents) # And then load it into a dictionary
+        cache_file.close() # Close the file, we're good, we got the data in a dictionary.
+    except:
+        CACHE_DICTION = {}
+    
+    return CACHE_DICTION
+
+def write_cache(cache_file, cache_dict):
+    """
+    This function encodes the cache dictionary (cache_dict) into JSON format and
+    writes the contents in the cache file (cache_file) to save the search results.
+    """
+    dumped_json_cache = json.dumps(cache_dict) #seriailze a dictionary to JSON
+    fw = open(cache_file, "w") #open cache file 
+    fw.write(dumped_json_cache) #write the json into the cache 
+    fw.close() #close the filw 
+    
+
+
+def get_data_with_caching():
+    """
+
+    """
+    
+    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=10"
+    
+    
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
+    CACHE_DICTION  = read_cache(CACHE_FNAME)
+    try:
+        if request_url in CACHE_DICTION:
+        
+            print("Using cache")
+            #add them to a dictionary, where key = request_url and value = results
+            #uhhhhhhhhhhhhhhhhhhh
+            return CACHE_DICTION[request_url]
+        
+
+        #exception
+        
+        else: #if request_url does not exist in CACHE_DICTION
+        
+            print("Fetching")
+            r = requests.get(request_url)
+            myDict = json.loads(r.text)
+            
+            CACHE_DICTION[request_url] = myDict
+                
+                #write out the dictionary to a file using the function write_cache   
+            write_cache(CACHE_FNAME, CACHE_DICTION)
+            return myDict
+    except:
+        print("Exception")
+        return None
 
 
 
@@ -82,6 +148,7 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 
 pokemon_data = get_pokemon_data()
 cur, conn = setUpDatabase('Pokemon.db')
-setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+# setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+get_data_with_caching()
 
 
