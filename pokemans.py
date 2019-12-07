@@ -159,16 +159,23 @@ def setUpTypeCategories(pokemon_data, cur, conn):
     category_list = []
     info = pokemon_data.items()
 
+    
     for pokemon in info:
         pokemon_type = pokemon[1]['types']
         for flavor in pokemon_type:
             if flavor['type']['name'] not in category_list:
                 category_list.append(flavor['type']['name'])
+    
     cur.execute("DROP TABLE IF EXISTS TypeCategories")
     cur.execute("CREATE TABLE TypeCategories (id INTEGER PRIMARY KEY, title TEXT)")
+
+
     for i in range(len(category_list)):
         cur.execute("INSERT INTO TypeCategories (id, title) VALUES(?, ?)", (i, category_list[i]))
+    
     conn.commit()
+
+    
     
 #---------- join tables ----------
 
@@ -183,11 +190,11 @@ def getPokemonTypeAndStats(cur, conn):
 pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('PokemonStats.db')
 setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
-getPokemonTypeAndStats(cur, conn)
-setUpPokemonTypeTable(pokemon_data, cur, conn)
+# getPokemonTypeAndStats(cur, conn)
+# setUpPokemonTypeTable(pokemon_data, cur, conn)
 
-getPokemonTypeAndStats(cur, conn)
-print(getPokemonTypeAndStats)
+# getPokemonTypeAndStats(cur, conn)
+# print(getPokemonTypeAndStats)
 
 setUpTypeCategories(pokemon_data, cur, conn)
 conn.close()
