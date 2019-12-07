@@ -154,6 +154,21 @@ def setUpPokemonTypeTable(pokemon_data, cur, conn):
 
         cur.execute('INSERT INTO PokemonTypes (pokemon_id, type_1, type_2) VALUES(?, ?, ?)', (_pokemon_id, _type_1, _type_2))
     conn.commit()
+
+def setUpTypeCategories(pokemon_data, cur, conn):
+    category_list = []
+    info = pokemon_data.items()
+
+    for pokemon in info:
+        pokemon_type = pokemon[1]['types']
+        for flavor in pokemon_type:
+            if flavor['type']['name'] not in category_list:
+                category_list.append(flavor['type']['name'])
+    cur.execute("DROP TABLE IF EXISTS TypeCategories")
+    cur.execute("CREATE TABLE TypeCategories (id INTEGER PRIMARY KEY, title TEXT)")
+    for i in range(len(category_list)):
+        cur.execute("INSERT INTO TypeCategories (id, title) VALUES(?, ?)", (i, category_list[i]))
+    conn.commit()
     
 #---------- join tables ----------
 
@@ -173,6 +188,8 @@ setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 getPokemonTypeAndStats(cur, conn)
 print(getPokemonTypeAndStats)
+
+setUpTypeCategories(pokemon_data, cur, conn)
 conn.close()
 
 
