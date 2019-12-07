@@ -113,11 +113,12 @@ def get_data_with_caching():
         print("Exception")
         return None
 
-#Fun table stuff
+#---------- setting up table stuff ----------
+
 def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     
-    cur.execute("DROP TABLE IF EXISTS Pokemon")
-    cur.execute('''CREATE TABLE Pokemon (pokemon_id INTEGER, 
+    cur.execute("DROP TABLE IF EXISTS PokemonStats")
+    cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, 
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER)''')
     info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -133,13 +134,13 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
         _attack = pokemon[1]['stats'][4]['base_stat'] 
         _hp = pokemon[1]['stats'][5]['base_stat'] 
 
-        cur.execute('INSERT INTO Pokemon (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
+        cur.execute('INSERT INTO PokemonStats (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
     conn.commit()
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
 
     cur.execute("DROP TABLE IF EXISTS PokemonTypes")
-    cur.execute('''CREATE TABLE PokemonTypes (pokemon_id INTEGER, 
+    cur.execute('''CREATE TABLE PokemonTypes (pokemon_id INTEGER PRIMARY KEY, 
                                         type_1 STRING, type_2 STRING)''')
     info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -154,13 +155,25 @@ def setUpPokemonTypeTable(pokemon_data, cur, conn):
         cur.execute('INSERT INTO PokemonTypes (pokemon_id, type_1, type_2) VALUES(?, ?, ?)', (_pokemon_id, _type_1, _type_2))
     conn.commit()
     
+#---------- join tables ----------
 
+def getPokemonTypeAndStats(cur, conn):
+    cur.execute('''SELECT PokemonStats.pokemon_id, PokemonTypes.type_1, PokemonTypes.type_2, 
+                PokemonStats.speed, PokemonStats.special_defense, PokemonStats.special_attack, 
+                PokemonStats.defense, PokemonStats.attack, PokemonStats.hp FROM PokemonStats 
+                INNER JOIN PokemonTypes ON PokemonStats.pokemon_id = PokemonTypes.pokemon_id''')
+    lst = cur.fetchall()
+    return lst
 
 pokemon_data = get_data_with_caching()
-cur, conn = setUpDatabase('Pokemon.db')
+cur, conn = setUpDatabase('PokemonStats.db')
 setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
-cur, conn = setUpDatabase('PokemonTypes.db')
+getPokemonTypeAndStats(cur, conn)
 setUpPokemonTypeTable(pokemon_data, cur, conn)
+
+getPokemonTypeAndStats(cur, conn)
+print(getPokemonTypeAndStats)
+conn.close()
 
 
 
