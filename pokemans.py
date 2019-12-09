@@ -20,31 +20,6 @@ def setUpDatabase(db_name):
     cur = conn.cursor()
 
     return cur, conn
-
-def get_pokemon_data():
-    #SOMETHING TO FIX HERE 
-    try:
-
-        base_url = "https://pokeapi.co/api/v2/pokemon/?limit=10" #probably need to limit this to 151 pokemon only
-        myDict = {}
-        
-            #getting each pokemon's unique URL 
-        ugh = requests.get(base_url)
-        all_pokemon = json.loads(ugh.text)
-
-        number = 1
-        for x in all_pokemon['results']:
-            url = x["url"]
-            r = requests.get(url)
-            info = json.loads(r.text)
-            myDict[number] =  info
-            number += 1
-               
-    except:
-        print("error when reading from url")
-        myDict = {}
-
-    return myDict 
     
 def read_cache(CACHE_FNAME):
     """
@@ -332,10 +307,24 @@ def createAverageSpeedGraph():
     plt.xlabel('Types')
     plt.title("Average Base Speed Stats v.s. Types of Pokemon")
     plt.show()
+
+def createAverageSpecialDefenseGraph():
+    specialDefenseStats = {}
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        specialDefenseStats[_type] = getAverageSpecialDefenseStats(_type, cur, conn)
+
+
+    plt.bar(specialDefenseStats.keys(), specialDefenseStats.values())
+
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base Special Defense Stats v.s. Types of Pokemon")
+    plt.show()
     
 
-
-#----- testing area-----
+#-----  set up main area -----
 pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('Pokemon.db')
 
@@ -345,12 +334,30 @@ setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 getPokemonTypeAndStats(cur, conn)
 
-print(getAverageSpeedStats("fire", cur, conn))
-print(getAverageSpecialDefenseStats("fire", cur, conn))
-print(getAverageSpecialAttackStats("fire", cur, conn))
-print(getAverageDefenseStats("fire", cur, conn))
-print(getAverageAttackStats("fire", cur, conn))
-print(getAverageHPStats("fire", cur, conn))
+#----- program
+
+print("Welcome to the pokemon base stat viewer. Here you can view average base stats of each pokemon typing. Quite insightful!")
+print("This program utilizes pokeapi.com, and created for the purpose of SI 206 Fall 2019 semester final project.")
+print("What kind of data would you like to view?")
+print("----------")
+
+print("(1) HP ")
+print("(2) Attack ")
+print("(3) Defense ")
+print("(4) Special Attack ")
+print("(5) Special Defense ")
+print("(6) Speed ")
+
+print("----------")
+
+userInput = input("Insert a number: ")
+
+if userInput == 1:
+    pass
+elif userInput ==2:
+    pass
+if userInput == 6:
+    print(createAverageSpeedGraph())
 
 createAverageSpeedGraph()
 # print("-------------------")
@@ -375,9 +382,12 @@ createAverageSpeedGraph()
 # print(getAverageAttackStats("normal", cur, conn))
 # print(getAverageHPStats("normal", cur, conn))
 
-
-
-
+# print(getAverageSpeedStats("fire", cur, conn))
+# print(getAverageSpecialDefenseStats("fire", cur, conn))
+# print(getAverageSpecialAttackStats("fire", cur, conn))
+# print(getAverageDefenseStats("fire", cur, conn))
+# print(getAverageAttackStats("fire", cur, conn))
+# print(getAverageHPStats("fire", cur, conn))
 
 
 conn.close()
