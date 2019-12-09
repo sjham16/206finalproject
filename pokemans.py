@@ -72,7 +72,7 @@ def write_cache(cache_file, cache_dict):
     
 def get_data_with_caching():
 
-    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=10"
+    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -118,14 +118,15 @@ def get_data_with_caching():
 def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     
     cur.execute("DROP TABLE IF EXISTS PokemonStats")
-    cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, 
+    cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
-                                        defense INTEGER, attack INTEGER, hp INTEGER)''')
+                                        defense INTEGER, attack INTEGER, hp INTEGER, type_1 INTEGER, type_2 INTEGER)''')
     info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     for pokemon in info:
          
         _pokemon_id = pokemon[1]['id']
+        _pokemon_name = pokemon[1]['species']['name']
         #something here....list indices not string but its a dictionary..??
         _speed = pokemon[1]['stats'][0]['base_stat']
         _special_defense = pokemon[1]['stats'][1]['base_stat']
@@ -134,7 +135,24 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
         _attack = pokemon[1]['stats'][4]['base_stat'] 
         _hp = pokemon[1]['stats'][5]['base_stat'] 
 
-        cur.execute('INSERT INTO PokemonStats (pokemon_id, speed, special_defense, special_attack, defense, attack, hp) VALUES (?, ?, ?, ?, ?, ?, ?)', (_pokemon_id, _speed, _special_defense, _special_attack, _defense, _attack, _hp))
+        category = pokemon[1]['types']
+
+        type1 = category[0]['type']['name']
+        cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type1, ))
+        c = cur.fetchone()[0]
+        _type_1 = c
+        _type_2 = ""
+
+        if len(category) == 2:
+            type2 = category[1]['type']['name']
+            cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type2, ))
+            d = cur.fetchone()[0]
+            _type_2 = d
+
+
+
+        cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
+                                                (_pokemon_id, _pokemon_name, _speed, _special_defense, _special_attack, _defense, _attack, _hp, _type_1, _type_2))
     conn.commit()
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
@@ -156,12 +174,11 @@ def setUpPokemonTypeTable(pokemon_data, cur, conn):
     conn.commit()
 
 def setUpTypeCategories(pokemon_data, cur, conn):
+    
+    cur.execute("DROP TABLE IF EXISTS TypeCategories")
+    cur.execute("CREATE TABLE TypeCategories (id INTEGER PRIMARY KEY, title TEXT)")
     category_list = []
     info = pokemon_data.items()
-
-    cur.execute("DROP TABLE IF EXISTS Categories")
-    cur.execute("CREATE TABLE Categories (id INTEGER PRIMARY KEY, title TEXT)")
-
     for pokemon in info:
         pokemon_type = pokemon[1]['types']
         for flavor in pokemon_type:
@@ -169,30 +186,28 @@ def setUpTypeCategories(pokemon_data, cur, conn):
                 category_list.append(flavor['type']['name'])
     
     for i in range(len(category_list)):
-        cur.execute("INSERT INTO Categories (id,title) VALUES (?,?)",(i,category_list[i]))
+        cur.execute("INSERT INTO TypeCategories (id,title) VALUES (?,?)",(i,category_list[i]))
     conn.commit()
 
-    
     
 #---------- join tables ----------
 
 def getPokemonTypeAndStats(cur, conn):
-    cur.execute('''SELECT PokemonStats.pokemon_id, PokemonTypes.type_1, PokemonTypes.type_2, 
-                PokemonStats.speed, PokemonStats.special_defense, PokemonStats.special_attack, 
-                PokemonStats.defense, PokemonStats.attack, PokemonStats.hp FROM PokemonStats 
+    cur.execute('''SELECT PokemonStats.pokemon_name, PokemonTypes.type_1, PokemonTypes.type_2 FROM PokemonStats 
                 INNER JOIN PokemonTypes ON PokemonStats.pokemon_id = PokemonTypes.pokemon_id''')
     lst = cur.fetchall()
     return lst
 
 pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('PokemonStats.db')
-setUpTypeCategories(pokemon_data, cur, conn)
-# setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
-# getPokemonTypeAndStats(cur, conn)
-# setUpPokemonTypeTable(pokemon_data, cur, conn)
 
-# getPokemonTypeAndStats(cur, conn)
-# print(getPokemonTypeAndStats)
+setUpTypeCategories(pokemon_data, cur, conn)
+setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
+setUpPokemonTypeTable(pokemon_data, cur, conn)
+
+getPokemonTypeAndStats(cur, conn)
+
+
 
 
 conn.close()
