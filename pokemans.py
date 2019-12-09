@@ -206,7 +206,7 @@ def getAverageSpeedStats(pokemon_type, cur, conn):
     cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
     type_id = cur.fetchall()[0][0]
 
-    cur.execute("SELECT speed FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
+    cur.execute("SELECT speed FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id, ))
 
     average = 0
     total = 0
@@ -218,7 +218,7 @@ def getAverageSpeedStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base speed stat for type " + pokemon_type + " is " + str(average))
+    return average
 
 def getAverageSpecialDefenseStats(pokemon_type, cur, conn):
     
@@ -237,7 +237,7 @@ def getAverageSpecialDefenseStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base special defense stat for type " + pokemon_type + " is " + str(average))
+    return average
 
 def getAverageSpecialAttackStats(pokemon_type, cur, conn):
     
@@ -256,7 +256,7 @@ def getAverageSpecialAttackStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base special attack stat for type " + str(pokemon_type) + " is " + str(average))
+    return average
 
 def getAverageDefenseStats(pokemon_type, cur, conn):
     
@@ -274,7 +274,7 @@ def getAverageDefenseStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base defense for type " + pokemon_type + " is " + str(average))
+    return average
 
 def getAverageAttackStats(pokemon_type, cur, conn):
     
@@ -292,7 +292,7 @@ def getAverageAttackStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base attack for type " + pokemon_type + " is " + str(average))
+    return average
 
 def getAverageHPStats(pokemon_type, cur, conn):
     
@@ -314,42 +314,25 @@ def getAverageHPStats(pokemon_type, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base hp for type " + str(pokemon_type)+ " is " + str(average))
+    return average
 
 #----------------visualization-------------------------------------
 #work in progress
 def createAverageSpeedGraph():
     speedStats = {}
-    cur.execute('SELECT speed, type_1, type_2 FROM PokemonStats')
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        speedStats[_type] = getAverageSpeedStats(_type, cur, conn)
 
-    for pokemon in cur:
-        
-        if len(pokemon) == 2:
-            speedStats[pokemon[-1]] = pokemon[0] + speedStats.get(pokemon[-1], 0)
 
-        if len(pokemon) > 2:
-            speedStats[pokemon[-2]] = pokemon[0] + speedStats.get(pokemon[-2], 0)
-            speedStats[pokemon[-1]] = pokemon[0] + speedStats.get(pokemon[-1], 0)
+    plt.bar(speedStats.keys(), speedStats.values())
 
-     #calculatiing averages
-     # 
-
-    cur.execute('SELECT type_1 FROM PokemonStats')
-    resu = cur.fetchall()
-
-    for pokemon_type in speedStats:
-         
-
-         speedStats[pokemon_type] = speedStats[pokemon_type] / len(resu)
-
-    # plt.bar(speedStats.keys(), speedStats.values())
-
-    # plt.ylabel('Points of Pokemon')
-    # plt.xlabel('Types')
-    # plt.title("Average Base Speed Stats v.s. Types of Pokemon")
-    # plt.show()
-    print(speedStats)
-
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base Speed Stats v.s. Types of Pokemon")
+    plt.show()
+    
 
 
 #----- testing area-----
@@ -369,28 +352,28 @@ print(getAverageDefenseStats("fire", cur, conn))
 print(getAverageAttackStats("fire", cur, conn))
 print(getAverageHPStats("fire", cur, conn))
 
-# createAverageSpeedGraph()
-print("-------------------")
-print(getAverageSpeedStats("water", cur, conn))
-print(getAverageSpecialDefenseStats("water", cur, conn))
-print(getAverageSpecialAttackStats("water", cur, conn))
-print(getAverageDefenseStats("water", cur, conn))
-print(getAverageAttackStats("water", cur, conn))
-print(getAverageHPStats("water", cur, conn))
-print("-------------------")
-print(getAverageSpeedStats("grass", cur, conn))
-print(getAverageSpecialDefenseStats("grass", cur, conn))
-print(getAverageSpecialAttackStats("grass", cur, conn))
-print(getAverageDefenseStats("grass", cur, conn))
-print(getAverageAttackStats("grass", cur, conn))
-print(getAverageHPStats("grass", cur, conn))
-print("-------------------")
-print(getAverageSpeedStats("normal", cur, conn))
-print(getAverageSpecialDefenseStats("normal", cur, conn))
-print(getAverageSpecialAttackStats("normal", cur, conn))
-print(getAverageDefenseStats("normal", cur, conn))
-print(getAverageAttackStats("normal", cur, conn))
-print(getAverageHPStats("normal", cur, conn))
+createAverageSpeedGraph()
+# print("-------------------")
+# print(getAverageSpeedStats("water", cur, conn))
+# print(getAverageSpecialDefenseStats("water", cur, conn))
+# print(getAverageSpecialAttackStats("water", cur, conn))
+# print(getAverageDefenseStats("water", cur, conn))
+# print(getAverageAttackStats("water", cur, conn))
+# print(getAverageHPStats("water", cur, conn))
+# print("-------------------")
+# print(getAverageSpeedStats("grass", cur, conn))
+# print(getAverageSpecialDefenseStats("grass", cur, conn))
+# print(getAverageSpecialAttackStats("grass", cur, conn))
+# print(getAverageDefenseStats("grass", cur, conn))
+# print(getAverageAttackStats("grass", cur, conn))
+# print(getAverageHPStats("grass", cur, conn))
+# print("-------------------")
+# print(getAverageSpeedStats("normal", cur, conn))
+# print(getAverageSpecialDefenseStats("normal", cur, conn))
+# print(getAverageSpecialAttackStats("normal", cur, conn))
+# print(getAverageDefenseStats("normal", cur, conn))
+# print(getAverageAttackStats("normal", cur, conn))
+# print(getAverageHPStats("normal", cur, conn))
 
 
 
