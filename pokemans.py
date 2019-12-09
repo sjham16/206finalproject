@@ -2,6 +2,7 @@ import requests
 import json
 import os
 import sqlite3
+import time
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -108,7 +109,8 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER, type_1 INTEGER, type_2 INTEGER)''')
-    info = pokemon_data.items()#why isnT IT WORKING HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    info = pokemon_data.items()
+    count = 0
 
     for pokemon in info:
          
@@ -140,7 +142,12 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 
         cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
                                                 (_pokemon_id, _pokemon_name, _speed, _special_defense, _special_attack, _defense, _attack, _hp, _type_1, _type_2))
-    conn.commit()
+        count = count + 1
+        conn.commit()
+
+        if count % 10 == 0:
+            print("Pausing for a bit....")
+            time.sleep(5)
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
 

@@ -47,7 +47,7 @@ def write_cache(cache_file, cache_dict):
 def get_data_with_caching():
     api_anime_code = 1
     #need to find a way to get 50 animes
-    base_url = "https://api.jikan.moe/v3/anime/{}/stats"
+    base_url = "https://api.jikan.moe/v3/anime/{}/"
     request_url = base_url.format(api_anime_code)
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
