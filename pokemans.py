@@ -74,7 +74,7 @@ def write_cache(cache_file, cache_dict):
     
 def get_data_with_caching():
 
-    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=20"
+    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -201,13 +201,12 @@ def getPokemonTypeAndStats(cur, conn):
     return lst
 
 #----------------- average base stats calculations------------------------
-def getAverageSpeedStats(pokemon_type_id, cur, conn):
+def getAverageSpeedStats(pokemon_type, cur, conn):
     
-    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
-    # pokemon_type_id = a.value()
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
 
-
-    cur.execute("SELECT speed FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+    cur.execute("SELECT speed FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
 
     average = 0
     total = 0
@@ -219,15 +218,14 @@ def getAverageSpeedStats(pokemon_type_id, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base speed stat for type " + str(pokemon_type_id) + " is " + str(average))
+    return ("The average base speed stat for type " + pokemon_type + " is " + str(average))
 
-def getAverageSpecialDefenseStats(pokemon_type_id, cur, conn):
+def getAverageSpecialDefenseStats(pokemon_type, cur, conn):
     
-    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
-    # pokemon_type_id = a.value()
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
 
-
-    cur.execute("SELECT special_defense FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+    cur.execute("SELECT special_defense FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
 
     average = 0
     total = 0
@@ -239,15 +237,14 @@ def getAverageSpecialDefenseStats(pokemon_type_id, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base special defense stat for type " + str(pokemon_type_id) + " is " + str(average))
+    return ("The average base special defense stat for type " + pokemon_type + " is " + str(average))
 
-def getAverageSpecialAttackStats(pokemon_type_id, cur, conn):
+def getAverageSpecialAttackStats(pokemon_type, cur, conn):
     
-    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
-    # pokemon_type_id = a.value()
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
 
-
-    cur.execute("SELECT special_attack FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+    cur.execute("SELECT special_attack FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
 
     average = 0
     total = 0
@@ -259,15 +256,53 @@ def getAverageSpecialAttackStats(pokemon_type_id, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base special attack stat for type " + str(pokemon_type_id) + " is " + str(average))
+    return ("The average base special attack stat for type " + str(pokemon_type) + " is " + str(average))
 
-def getAverageDefenseStats(pokemon_type_id, cur, conn):
+def getAverageDefenseStats(pokemon_type, cur, conn):
+    
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
+
+    cur.execute("SELECT defense FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base defense for type " + pokemon_type + " is " + str(average))
+
+def getAverageAttackStats(pokemon_type, cur, conn):
+    
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
+
+    cur.execute("SELECT attack FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base attack for type " + pokemon_type + " is " + str(average))
+
+def getAverageHPStats(pokemon_type, cur, conn):
     
     # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
     # pokemon_type_id = a.value()
 
+    cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
+    type_id = cur.fetchall()[0][0]
 
-    cur.execute("SELECT defense FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+    cur.execute("SELECT hp FROM PokemonStats WHERE type_1 =? OR type_2 =?", (type_id, type_id,   ))
 
     average = 0
     total = 0
@@ -279,47 +314,7 @@ def getAverageDefenseStats(pokemon_type_id, cur, conn):
     average = total / len(resu)
 
      
-    return ("The average base defense for type " + str(pokemon_type_id) + " is " + str(average))
-
-def getAverageAttackStats(pokemon_type_id, cur, conn):
-    
-    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
-    # pokemon_type_id = a.value()
-
-
-    cur.execute("SELECT attack FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
-
-    average = 0
-    total = 0
-    resu = cur.fetchall()
-
-    for pokemon in resu:
-        total = pokemon[0] + total
-
-    average = total / len(resu)
-
-     
-    return ("The average base attack for type " + str(pokemon_type_id) + " is " + str(average))
-
-def getAverageHPStats(pokemon_type_id, cur, conn):
-    
-    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
-    # pokemon_type_id = a.value()
-
-
-    cur.execute("SELECT hp FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
-
-    average = 0
-    total = 0
-    resu = cur.fetchall()
-
-    for pokemon in resu:
-        total = pokemon[0] + total
-
-    average = total / len(resu)
-
-     
-    return ("The average base hp for type " + str(pokemon_type_id) + " is " + str(average))
+    return ("The average base hp for type " + str(pokemon_type)+ " is " + str(average))
 
 #----------------visualization-------------------------------------
 #work in progress
@@ -367,14 +362,14 @@ setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 getPokemonTypeAndStats(cur, conn)
 
-print(getAverageSpeedStats(4, cur, conn))
-print(getAverageSpecialDefenseStats(4, cur, conn))
-print(getAverageSpecialAttackStats(4, cur, conn))
-print(getAverageDefenseStats(4, cur, conn))
-print(getAverageAttackStats(4, cur, conn))
-print(getAverageHPStats(4, cur, conn))
+print(getAverageHPStats("fire", cur, conn))
+print(getAverageSpecialDefenseStats("fire", cur, conn))
+print(getAverageSpecialAttackStats("water", cur, conn))
+print(getAverageDefenseStats("fire", cur, conn))
+print(getAverageAttackStats("grass", cur, conn))
+print(getAverageHPStats("fire", cur, conn))
 
-createAverageSpeedGraph()
+# createAverageSpeedGraph()
 
 
 
