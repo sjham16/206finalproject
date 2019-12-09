@@ -3,6 +3,8 @@ import json
 import os
 import sqlite3
 
+import matplotlib
+import matplotlib.pyplot as plt
 
 
 
@@ -72,7 +74,7 @@ def write_cache(cache_file, cache_dict):
     
 def get_data_with_caching():
 
-    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
+    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=20"
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -113,7 +115,7 @@ def get_data_with_caching():
         print("Exception")
         return None
 
-#---------- setting up table stuff ----------
+#------------------- setting up table stuff ---------------------
 
 def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     
@@ -189,7 +191,7 @@ def setUpTypeCategories(pokemon_data, cur, conn):
         cur.execute("INSERT INTO TypeCategories (id,title) VALUES (?,?)",(i,category_list[i]))
     conn.commit()
     
-#---------- join tables ----------
+#------------------ join tables ---------------------------------
 
 #this is added A pokemon's type ID number to their respective stats. 
 def getPokemonTypeAndStats(cur, conn):
@@ -198,7 +200,7 @@ def getPokemonTypeAndStats(cur, conn):
     lst = cur.fetchall()
     return lst
 
-
+#----------------- average base stats calculations------------------------
 def getAverageSpeedStats(pokemon_type_id, cur, conn):
     
     # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
@@ -319,6 +321,42 @@ def getAverageHPStats(pokemon_type_id, cur, conn):
      
     return ("The average base hp for type " + str(pokemon_type_id) + " is " + str(average))
 
+#----------------visualization-------------------------------------
+#work in progress
+def createAverageSpeedGraph():
+    speedStats = {}
+    cur.execute('SELECT speed, type_1, type_2 FROM PokemonStats')
+
+    for pokemon in cur:
+        
+        if len(pokemon) == 2:
+            speedStats[pokemon[-1]] = pokemon[0] + speedStats.get(pokemon[-1], 0)
+
+        if len(pokemon) > 2:
+            speedStats[pokemon[-2]] = pokemon[0] + speedStats.get(pokemon[-2], 0)
+            speedStats[pokemon[-1]] = pokemon[0] + speedStats.get(pokemon[-1], 0)
+
+     #calculatiing averages
+     # 
+
+    cur.execute('SELECT type_1 FROM PokemonStats')
+    resu = cur.fetchall()
+
+    for pokemon_type in speedStats:
+         
+
+         speedStats[pokemon_type] = speedStats[pokemon_type] / len(resu)
+
+    # plt.bar(speedStats.keys(), speedStats.values())
+
+    # plt.ylabel('Points of Pokemon')
+    # plt.xlabel('Types')
+    # plt.title("Average Base Speed Stats v.s. Types of Pokemon")
+    # plt.show()
+    print(speedStats)
+
+
+
 #----- testing area-----
 pokemon_data = get_data_with_caching()
 cur, conn = setUpDatabase('Pokemon.db')
@@ -335,6 +373,8 @@ print(getAverageSpecialAttackStats(4, cur, conn))
 print(getAverageDefenseStats(4, cur, conn))
 print(getAverageAttackStats(4, cur, conn))
 print(getAverageHPStats(4, cur, conn))
+
+createAverageSpeedGraph()
 
 
 
