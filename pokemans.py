@@ -188,24 +188,153 @@ def setUpTypeCategories(pokemon_data, cur, conn):
     for i in range(len(category_list)):
         cur.execute("INSERT INTO TypeCategories (id,title) VALUES (?,?)",(i,category_list[i]))
     conn.commit()
-
     
 #---------- join tables ----------
 
+#this is added A pokemon's type ID number to their respective stats. 
 def getPokemonTypeAndStats(cur, conn):
     cur.execute('''SELECT PokemonStats.pokemon_name, PokemonTypes.type_1, PokemonTypes.type_2 FROM PokemonStats 
                 INNER JOIN PokemonTypes ON PokemonStats.pokemon_id = PokemonTypes.pokemon_id''')
     lst = cur.fetchall()
     return lst
 
+
+def getAverageSpeedStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT speed FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base speed stat for type " + str(pokemon_type_id) + " is " + str(average))
+
+def getAverageSpecialDefenseStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT special_defense FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base special defense stat for type " + str(pokemon_type_id) + " is " + str(average))
+
+def getAverageSpecialAttackStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT special_attack FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base special attack stat for type " + str(pokemon_type_id) + " is " + str(average))
+
+def getAverageDefenseStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT defense FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base defense for type " + str(pokemon_type_id) + " is " + str(average))
+
+def getAverageAttackStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT attack FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base attack for type " + str(pokemon_type_id) + " is " + str(average))
+
+def getAverageHPStats(pokemon_type_id, cur, conn):
+    
+    # a = cur.execute("SELECT id FROM TypeCategories WHERE title >=?", (pokemon_type_name, ))
+    # pokemon_type_id = a.value()
+
+
+    cur.execute("SELECT hp FROM PokemonStats WHERE type_1 >=? OR type_2 >=?", (pokemon_type_id, pokemon_type_id,  ))
+
+    average = 0
+    total = 0
+    resu = cur.fetchall()
+
+    for pokemon in resu:
+        total = pokemon[0] + total
+
+    average = total / len(resu)
+
+     
+    return ("The average base hp for type " + str(pokemon_type_id) + " is " + str(average))
+
+#----- testing area-----
 pokemon_data = get_data_with_caching()
-cur, conn = setUpDatabase('PokemonStats.db')
+cur, conn = setUpDatabase('Pokemon.db')
 
 setUpTypeCategories(pokemon_data, cur, conn)
 setUpPokemonBaseStatsTable(pokemon_data, cur, conn)
 setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 getPokemonTypeAndStats(cur, conn)
+
+print(getAverageSpeedStats(4, cur, conn))
+print(getAverageSpecialDefenseStats(4, cur, conn))
+print(getAverageSpecialAttackStats(4, cur, conn))
+print(getAverageDefenseStats(4, cur, conn))
+print(getAverageAttackStats(4, cur, conn))
+print(getAverageHPStats(4, cur, conn))
 
 
 
