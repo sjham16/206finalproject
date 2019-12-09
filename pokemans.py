@@ -50,6 +50,7 @@ def write_cache(cache_file, cache_dict):
 def get_data_with_caching():
 
     request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
+
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -57,9 +58,18 @@ def get_data_with_caching():
     try:
         if request_url in CACHE_DICTION:
         
-            print("Using cache")
+            print("Using pokemon cache")
             #add them to a dictionary, where key = request_url and value = results
             #uhhhhhhhhhhhhhhhhhhh
+            
+            
+            #pull the last stored pokemon id from the database (max value in id)
+            #increment id
+            #repeat 20 times:
+                #pull corresponding pokemone with id
+                #increment id
+
+
             return CACHE_DICTION[request_url]
         
         #exception
@@ -301,7 +311,9 @@ def createAverageSpeedGraph():
         speedStats[_type] = getAverageSpeedStats(_type, cur, conn)
 
 
-    plt.bar(speedStats.keys(), speedStats.values())
+    plt.bar(speedStats.keys(), speedStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -322,7 +334,66 @@ def createAverageSpecialDefenseGraph():
     plt.xlabel('Types')
     plt.title("Average Base Special Defense Stats v.s. Types of Pokemon")
     plt.show()
-    
+
+def createAverageSpecialAttackGraph():
+    specialAttackStats = {}
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        specialAttackStats[_type] = getAverageSpecialAttackStats(_type, cur, conn)
+
+
+    plt.bar(specialAttackStats.keys(), specialAttackStats.values())
+
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base Special Attack Stats v.s. Types of Pokemon")
+    plt.show()
+
+def createAverageDefenseGraph():
+    defenseStats = {}
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        defenseStats[_type] = getAverageDefenseStats(_type, cur, conn)
+
+
+    plt.bar(defenseStats.keys(), defenseStats.values())
+
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base Defense Stats v.s. Types of Pokemon")
+    plt.show()
+
+def createAverageAttackGraph():
+    attackStats = {}
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        attackStats[_type] = getAverageAttackStats(_type, cur, conn)
+
+
+    plt.bar(attackStats.keys(), attackStats.values())
+
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base Attack Stats v.s. Types of Pokemon")
+    plt.show()
+
+def createAverageHPGraph():
+    HPStats = {}
+    pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
+            'rock', 'steel', 'ice', 'ghost', 'dragon']
+    for _type in pokemon_types:
+        HPStats[_type] = getAverageHPStats(_type, cur, conn)
+
+
+    plt.bar(HPStats.keys(), HPStats.values())
+
+    plt.ylabel('Points of Pokemon')
+    plt.xlabel('Types')
+    plt.title("Average Base HP Stats v.s. Types of Pokemon")
+    plt.show()
 
 #-----  set up main area -----
 pokemon_data = get_data_with_caching()
@@ -350,18 +421,18 @@ print("(6) Speed ")
 
 print("----------")
 
-userInput = input("Insert a number: ")
+# userInput = input("Insert a number: ")
 
-if userInput == 1:
-    pass
-elif userInput ==2:
-    pass
-if userInput == 6:
-    print(createAverageSpeedGraph())
-
+# if userInput == 1:
+#     pass
+# elif userInput ==2:
+#     pass
+# if userInput == 6:
+#     print(createAverageSpeedGraph())
 createAverageSpeedGraph()
+
 # print("-------------------")
-# print(getAverageSpeedStats("water", cur, conn))
+print(getAverageSpeedStats("water", cur, conn))
 # print(getAverageSpecialDefenseStats("water", cur, conn))
 # print(getAverageSpecialAttackStats("water", cur, conn))
 # print(getAverageDefenseStats("water", cur, conn))
