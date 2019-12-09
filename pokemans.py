@@ -362,14 +362,37 @@ setUpPokemonTypeTable(pokemon_data, cur, conn)
 
 getPokemonTypeAndStats(cur, conn)
 
-print(getAverageHPStats("fire", cur, conn))
+print(getAverageSpeedStats("fire", cur, conn))
 print(getAverageSpecialDefenseStats("fire", cur, conn))
-print(getAverageSpecialAttackStats("water", cur, conn))
+print(getAverageSpecialAttackStats("fire", cur, conn))
 print(getAverageDefenseStats("fire", cur, conn))
-print(getAverageAttackStats("grass", cur, conn))
+print(getAverageAttackStats("fire", cur, conn))
 print(getAverageHPStats("fire", cur, conn))
 
 # createAverageSpeedGraph()
+print("-------------------")
+print(getAverageSpeedStats("water", cur, conn))
+print(getAverageSpecialDefenseStats("water", cur, conn))
+print(getAverageSpecialAttackStats("water", cur, conn))
+print(getAverageDefenseStats("water", cur, conn))
+print(getAverageAttackStats("water", cur, conn))
+print(getAverageHPStats("water", cur, conn))
+print("-------------------")
+print(getAverageSpeedStats("grass", cur, conn))
+print(getAverageSpecialDefenseStats("grass", cur, conn))
+print(getAverageSpecialAttackStats("grass", cur, conn))
+print(getAverageDefenseStats("grass", cur, conn))
+print(getAverageAttackStats("grass", cur, conn))
+print(getAverageHPStats("grass", cur, conn))
+print("-------------------")
+print(getAverageSpeedStats("normal", cur, conn))
+print(getAverageSpecialDefenseStats("normal", cur, conn))
+print(getAverageSpecialAttackStats("normal", cur, conn))
+print(getAverageDefenseStats("normal", cur, conn))
+print(getAverageAttackStats("normal", cur, conn))
+print(getAverageHPStats("normal", cur, conn))
+
+
 
 
 
