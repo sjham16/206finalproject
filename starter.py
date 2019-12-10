@@ -3,6 +3,7 @@ import json
 import os
 import unittest
 import sqlite3
+import time
 
 
 from jikanpy import Jikan
@@ -45,38 +46,33 @@ def write_cache(cache_file, cache_dict):
     fw.close() #close the filw 
     
 def get_data_with_caching():
+
     api_anime_code = 1
-    #need to find a way to get 50 animes
-    base_url = "https://api.jikan.moe/v3/anime/{}/"
-    request_url = base_url.format(api_anime_code)
+
+    for anime in range(5):
+
+        base_url = "https://api.jikan.moe/v3/anime/{}/"
+        request_url = base_url.format(api_anime_code)
     
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
-    CACHE_DICTION  = read_cache(CACHE_FNAME)
-    try:
-        if request_url in CACHE_DICTION:
-        
-            print("Using jikan anime_list cache")
-            #add them to a dictionary, where key = request_url and value = results
-            #uhhhhhhhhhhhhhhhhhhh
-            
-            
-            #pull the last stored pokemon id from the database (max value in id)
-            #increment id
-            #repeat 20 times:
-                #pull corresponding pokemone with id
-                #increment id
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
+        CACHE_DICTION  = read_cache(CACHE_FNAME)
 
+        try:
+            if request_url in CACHE_DICTION:
+        
+                print("Using jikan anime_list cache")
+            
 
-            return CACHE_DICTION[request_url]
+                return CACHE_DICTION[request_url]
         
-        #exception
         
-        else: #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
         
-            print("Fetching")
-            ugh = requests.get(request_url)
-            all_anime = json.loads(ugh.text)
+            else: 
+                #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
+                print("Fetching")
+                ugh = requests.get(request_url)
+                all_anime = json.loads(ugh.text)
 
             # myDict = {}
                      
@@ -90,16 +86,57 @@ def get_data_with_caching():
             
             
             
-            CACHE_DICTION[request_url] = all_anime
+                CACHE_DICTION[request_url] = all_anime
                 #write out the dictionary to a file using the function write_cache   
-            write_cache(CACHE_FNAME, CACHE_DICTION)
-            return all_anime
-    except:
-        print("Exception")
-        return None
+                write_cache(CACHE_FNAME, CACHE_DICTION)
 
+                api_anime_code += 1
+
+                
+        except:
+            print("Exception")
+            return None
+    
+    return all_anime
+    
+    #need to find a way to get 50 animes
+    
+#---------- database setup --------
+
+def setUpAnimeInfoTable(anime_data, cur, conn):
+    cur.execute("DROP TABLE IF EXISTS Anime")
+    cur.execute('''CREATE TABLE Anime (anime_id INTEGER PRIMARY KEY, name TEXT,
+                                        rating INTEGER, premiere TEXT, broadcast TEXT)''')
+    info = anime_data.items()
+    #something is fucked up here
+    count = 0
+
+    for anime in info:
+        _anime_id = anime[1]["mal_id"]
+        _name = anime["title_english"]
+        _rating = anime["score"]
+        _premiere = anime["premiered"]
+        _broadcast = anime["broadcast"] #do some regex stuff here
+
+
+        cur.execute('INSERT INTO Anime (anime_id, name, rating, premiere, broadcast) VALUES (?, ?, ?, ?, ?)',
+        (_anime_id, _name, _rating, _premiere, _broadcast))
+
+        count = count + 1
+        conn.commit()
+
+        if count % 10 == 0:
+            print("Pausing for a bit....")
+            time.sleep(1)
+
+
+
+            
 
 anime_data = get_data_with_caching()
+cur, conn = setUpDatabase('Anime.db')
+
+setUpAnimeInfoTable(anime_data, cur, conn)
 
 
 
