@@ -3,6 +3,8 @@ import json
 import os
 import sqlite3
 import time
+import csv
+
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -147,7 +149,7 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 
         if count % 10 == 0:
             print("Pausing for a bit....")
-            time.sleep(5)
+            time.sleep(1)
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
 
@@ -308,6 +310,7 @@ def getAverageHPStats(pokemon_type, cur, conn):
      
     return average
 
+
 #----------------visualization-------------------------------------
 #work in progress
 def createAverageSpeedGraph():
@@ -436,36 +439,62 @@ print("----------")
 #     pass
 # if userInput == 6:
 #     print(createAverageSpeedGraph())
-createAverageSpeedGraph()
+# createAverageSpeedGraph()
 
-# print("-------------------")
-print(getAverageSpeedStats("water", cur, conn))
-# print(getAverageSpecialDefenseStats("water", cur, conn))
-# print(getAverageSpecialAttackStats("water", cur, conn))
-# print(getAverageDefenseStats("water", cur, conn))
-# print(getAverageAttackStats("water", cur, conn))
-# print(getAverageHPStats("water", cur, conn))
-# print("-------------------")
-# print(getAverageSpeedStats("grass", cur, conn))
-# print(getAverageSpecialDefenseStats("grass", cur, conn))
-# print(getAverageSpecialAttackStats("grass", cur, conn))
-# print(getAverageDefenseStats("grass", cur, conn))
-# print(getAverageAttackStats("grass", cur, conn))
-# print(getAverageHPStats("grass", cur, conn))
-# print("-------------------")
-# print(getAverageSpeedStats("normal", cur, conn))
-# print(getAverageSpecialDefenseStats("normal", cur, conn))
-# print(getAverageSpecialAttackStats("normal", cur, conn))
-# print(getAverageDefenseStats("normal", cur, conn))
-# print(getAverageAttackStats("normal", cur, conn))
-# print(getAverageHPStats("normal", cur, conn))
+#-------------------csv stuff-------------------------------------
 
-# print(getAverageSpeedStats("fire", cur, conn))
-# print(getAverageSpecialDefenseStats("fire", cur, conn))
-# print(getAverageSpecialAttackStats("fire", cur, conn))
-# print(getAverageDefenseStats("fire", cur, conn))
-# print(getAverageAttackStats("fire", cur, conn))
-# print(getAverageHPStats("fire", cur, conn))
+with open('pokemon_calc.csv', 'w', newline = '') as csvfile:
+
+    fields = ['Pokemon Type', 'Average HP', 'Average Attack', 'Average Defense', 
+            'Average Special Attack','Average Special Defense', 'Average Speed']
+
+    csvwriter = csv.writer(csvfile)
+    #WRITING THE HEADERS
+    csvwriter.writerow(fields)
+
+
+
+
+
+
+    cur.execute("SELECT title FROM TypeCategories")
+    #adjsut this
+    typeNames = []
+    for x in cur:
+        if x[0] not in typeNames:
+            typeNames.append(str(x[0]))
+
+    averageSpeeds = []
+    for x in typeNames:
+        speed = getAverageSpeedStats(x, cur, conn)
+        averageSpeeds.append(speed)
+    averageSpecialDefenses = []
+    for x in typeNames:
+        special_defense = getAverageSpecialDefenseStats(x, cur, conn)
+        averageSpecialDefenses.append(special_defense)
+    averageSpecialAttacks = []
+    for x in typeNames:
+        special_attack = getAverageSpecialAttackStats(x, cur, conn)
+        averageSpecialAttacks.append(special_attack)
+    averageDefenses = []
+    for x in typeNames:
+        defense = getAverageSpecialDefenseStats(x, cur, conn)
+        averageDefenses.append(defense)
+    averageAttacks = []
+    for x in typeNames:
+        attack = getAverageAttackStats(x, cur, conn)
+        averageAttacks.append(attack)
+    averageHps = []
+    for x in typeNames:
+        hp = getAverageHPStats(x, cur, conn)
+        averageHps.append(hp)
+
+    rows = zip(typeNames, averageSpeeds, averageSpecialDefenses, averageSpecialAttacks,
+            averageDefenses, averageAttacks, averageHps)
+
+    for x in rows:
+        csvwriter.writerow(x)
+
 
 
 conn.close()
