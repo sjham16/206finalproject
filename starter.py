@@ -51,7 +51,8 @@ def get_data_with_caching():
 
     for anime in range(5):
 
-        base_url = "https://api.jikan.moe/v3/anime/{}/"
+        base_url = "https://api.jikan.moe/v3/search/anime?q=2013-2018&limit=101"
+        #FIX this url
         request_url = base_url.format(api_anime_code)
     
         dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -106,21 +107,25 @@ def get_data_with_caching():
 def setUpAnimeInfoTable(anime_data, cur, conn):
     cur.execute("DROP TABLE IF EXISTS Anime")
     cur.execute('''CREATE TABLE Anime (anime_id INTEGER PRIMARY KEY, name TEXT,
-                                        rating INTEGER, premiere TEXT, broadcast TEXT)''')
-    info = anime_data.items()
+                                        score INTEGER, rated TEXT, rated_id INTEGER)''')
+    info = anime_data['results']
+    
     #something is fucked up here
     count = 0
 
     for anime in info:
-        _anime_id = anime[1]["mal_id"]
-        _name = anime["title_english"]
-        _rating = anime["score"]
-        _premiere = anime["premiered"]
-        _broadcast = anime["broadcast"] #do some regex stuff here
+        _anime_id = anime["mal_id"]
+        _name = anime["title"]
+        _score = anime["score"]
+        _rated = anime['rated']
+        
+        cur.execute("SELECT id FROM Rated WHERE rated = ? LIMIT 1", (_rated, ))
+        c = cur.fetchone()[0]
+        _rated_id = c
 
 
-        cur.execute('INSERT INTO Anime (anime_id, name, rating, premiere, broadcast) VALUES (?, ?, ?, ?, ?)',
-        (_anime_id, _name, _rating, _premiere, _broadcast))
+        cur.execute('INSERT INTO Anime (anime_id, name, score, rated, rated_id) VALUES (?, ?, ?, ?, ?)',
+        (_anime_id, _name, _score, _rated, _rated_id))
 
         count = count + 1
         conn.commit()
@@ -129,14 +134,31 @@ def setUpAnimeInfoTable(anime_data, cur, conn):
             print("Pausing for a bit....")
             time.sleep(1)
 
+def setUpRatedTable(anime_data, cur, conn):
 
+    cur.execute("DROP TABLE IF EXISTS Rated")
+    cur.execute("CREATE TABLE Rated (id INTEGER PRIMARY KEY, rated TEXT)")
+
+    genre_list = []
+    info = anime_data['results']
+
+    for x in info:
+        genre = x['rated']
+        if genre not in genre_list:
+            genre_list.append(genre)
+    
+    for i in range(len(genre_list)):
+        cur.execute("INSERT INTO Rated (id, rated) VALUES (?,?)", (i, genre_list[i]))
+    conn.commit()
 
             
 
 anime_data = get_data_with_caching()
 cur, conn = setUpDatabase('Anime.db')
 
+setUpRatedTable(anime_data, cur, conn)
 setUpAnimeInfoTable(anime_data, cur, conn)
+
 
 
 
