@@ -419,28 +419,45 @@ getPokemonTypeAndStats(cur, conn)
 
 print("Welcome to the pokemon base stat viewer. Here you can view average base stats of each pokemon typing. Quite insightful!")
 print("This program utilizes pokeapi.com, and created for the purpose of SI 206 Fall 2019 semester final project.")
-print("What kind of data would you like to view?")
+print("What kind of data would you like to visualize?")
 print("----------")
 
-print("(1) HP ")
-print("(2) Attack ")
-print("(3) Defense ")
-print("(4) Special Attack ")
-print("(5) Special Defense ")
-print("(6) Speed ")
+print("(1) Average HP ")
+print("(2) Average Attack ")
+print("(3) Average Defense ")
+print("(4) Average Special Attack ")
+print("(5) Average Special Defense ")
+print("(6) Average Speed ")
+print("'q' to quit the program")
 
 print("----------")
 
-# userInput = input("Insert a number: ")
+userInput = input("Insert a number: ")
 
-# if userInput == 1:
-#     pass
-# elif userInput ==2:
-#     pass
-# if userInput == 6:
-#     print(createAverageSpeedGraph())
-# createAverageSpeedGraph()
+while userInput != 'q':
+    if userInput == '1':
+        createAverageHPGraph()
+        continue
+    elif userInput =='2':
+        print(createAverageAttackGraph())
+        continue
+    elif userInput == '3':
+        print(createAverageDefenseGraph())
+        continue
+    elif userInput == '4':
+        print(createAverageSpecialAttackGraph())
+        continue
+    elif userInput == '5':
+        print(createAverageSpecialDefenseGraph())
+        continue
+    elif userInput == '6':
+        print(createAverageSpeedGraph())
+        continue
+    else:
+        print("That's not a valid input....Please try again")
+        continue
 
+print("Bye!")
 #-------------------csv stuff-------------------------------------
 
 with open('pokemon_calc.csv', 'w', newline = '') as csvfile:
@@ -449,16 +466,9 @@ with open('pokemon_calc.csv', 'w', newline = '') as csvfile:
             'Average Special Attack','Average Special Defense', 'Average Speed']
 
     csvwriter = csv.writer(csvfile)
-    #WRITING THE HEADERS
     csvwriter.writerow(fields)
 
-
-
-
-
-
     cur.execute("SELECT title FROM TypeCategories")
-    #adjsut this
     typeNames = []
     for x in cur:
         if x[0] not in typeNames:
@@ -494,8 +504,6 @@ with open('pokemon_calc.csv', 'w', newline = '') as csvfile:
 
     for x in rows:
         csvwriter.writerow(x)
-
-
 
 conn.close()
 
