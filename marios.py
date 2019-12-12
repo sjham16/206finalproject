@@ -117,7 +117,7 @@ def decade_rating_chart(data):
     for a,b in data:
         names.append(a)
         values.append(b)
-    plt.bar(names,values)
+    plt.bar(names,values,color=['red', 'green', 'blue', 'purple'])
     axes = plt.gca()
     axes.set_ylim([3.5,4.5])
     plt.ylabel('Rating (out of 5)')
@@ -125,33 +125,36 @@ def decade_rating_chart(data):
     plt.suptitle('Average rating of Mario games by decade of release')
     plt.show()
 
+def write_to_txt(data):
+    lst = []
+    for x in data:
+        lst.append(str(x[0]))
+        lst.append(str(x[1]))
+    with open('mario_data.txt', 'w',) as txtfile:
+        for x in lst:
+            txtfile.write(x)
+            txtfile.write('\n')
+    txtfile.close()
+
 mario = get_mario_data()
 cur, conn = setUpDatabase('videogames.db')
 make_mario_database(mario, cur, conn)
 data = decade_rate(mario, cur, conn)
 decade_rating_chart(data)
+write_to_txt(data)
 cur.close()
+conn.close()
 
 # print("""Welcome to the Mario video game decade rater.
 # This program will visualize the average rating for each decade of Mario games.""")
 # print("This program utilizes RAWG Video Games Database API, and created for the purpose of SI 206 Fall 2019 semester final project.")
-# print("Wanna see the graph?")
+# print("What would you like to do?")
 # print("----------")
 
-# print("(yes) <--- shows the graph ")
-# print("(no) <--- quits the program ")
+# print("(1) show the graph")
+# print("(2) write the data to a text file")
+# print("(3) quit the program")
 
 # print("----------")
 
-# userInput = input("Enter yes or no: ")
-
-
-
-# pages=[1,2,3,4,5,6,7,8]
-# for page in pages:
-#     for x in mario[page]["results"]:
-#         print("Title: " + x["name"])
-#         print("Rating: " + str(x["rating"]))
-#         print("Release Date: " + str(x["released"]))
-#         print("ID: " + str(x["id"]))
-#         print("---")
+# userInput = input("Enter a number: ")
