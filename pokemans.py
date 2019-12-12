@@ -407,7 +407,7 @@ def createAverageHPGraph():
 
 #-----  set up main area -----
 pokemon_data = get_data_with_caching()
-cur, conn = setUpDatabase('Pokemon.db')
+cur, conn = setUpDatabase('videogames.db')
 
 setUpTypeCategories(pokemon_data, cur, conn)
 setUpPokemonBaseStatsTable(pokemon_data, cur, conn)

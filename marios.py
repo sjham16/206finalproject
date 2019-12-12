@@ -10,7 +10,6 @@ import matplotlib.pyplot as plt
 def setUpDatabase(db_name):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-
     return cur, conn
     
 def get_mario_data():
@@ -54,7 +53,7 @@ def make_mario_database(mario, cur, conn):
 
 
 mario = get_mario_data()
-cur, conn = setUpDatabase('Mario.db')
+cur, conn = setUpDatabase('videogames.db')
 make_mario_database(mario, cur, conn)
 
 # pages=[1,2,3,4,5,6,7,8]
