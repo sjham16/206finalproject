@@ -198,7 +198,7 @@ userInput = input("Enter a number or 'q' to quit: ")
 while userInput != 'q':
     if userInput == '1':
         decade_rating_chart(data)
-        print("Cool chart, rigt?")
+        print("Cool chart, right?")
         print("Anything else you want to do?")
         userInput = input("Enter a number or 'q' to quit: ")
         continue
