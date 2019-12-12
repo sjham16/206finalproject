@@ -432,29 +432,48 @@ print("'q' to quit the program")
 
 print("----------")
 
-userInput = input("Insert a number: ")
+userInput = input("Enter a number or 'q' to quit: ")
 
 while userInput != 'q':
     if userInput == '1':
         createAverageHPGraph()
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput =='2':
         print(createAverageAttackGraph())
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput == '3':
         print(createAverageDefenseGraph())
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput == '4':
         print(createAverageSpecialAttackGraph())
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput == '5':
         print(createAverageSpecialDefenseGraph())
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput == '6':
         print(createAverageSpeedGraph())
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
     else:
         print("That's not a valid input....Please try again")
+        userInput = input("Enter a number or 'q' to quit: ")
         continue
 
 print("Bye!")

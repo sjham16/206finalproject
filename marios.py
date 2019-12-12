@@ -11,15 +11,50 @@ def setUpDatabase(db_name):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     return cur, conn
+
+def read_cache(CACHE_FNAME):
+    """
+    This function reads from the JSON cache file and returns a dictionary from the cache data. 
+    If the file doesn’t exist, it returns an empty dictionary.
+    """
+    try:
+        cache_file = open(CACHE_FNAME, 'r', encoding="utf-8")
+        cache_contents = cache_file.read()
+        CACHE_DICTION = json.loads(cache_contents)
+        cache_file.close()
+    except:
+        CACHE_DICTION = {}
+    
+    return CACHE_DICTION
+
+def write_cache(cache_file, cache_dict):
+    """
+    This function encodes the cache dictionary (cache_dict) into JSON format and
+    writes the contents in the cache file (cache_file) to save the search results.
+    """
+    dumped_json_cache = json.dumps(cache_dict)
+    fw = open(cache_file, "w")
+    fw.write(dumped_json_cache)
+    fw.close()
     
 def get_mario_data():
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    CACHE_FNAME = dir_path + '/' + "mario_cache.json"
+    CACHE_DICTION  = read_cache(CACHE_FNAME)
     d={}
     pages=[1,2,3,4,5,6,7,8]
     for x in pages:
         try:
             url = "https://api.rawg.io/api/games?page={}&page_size=20&search=mario&publishers=nintendo".format(x)
-            r = requests.get(url)
-            d[x] = json.loads(r.text)
+            if url in CACHE_DICTION:
+                print("Getting data from the cache...")
+                d[x] = CACHE_DICTION[url]
+            else:
+                print("Requesting the data from the API...")
+                r = requests.get(url)
+                d[x] = json.loads(r.text)
+                CACHE_DICTION[url] = d[x]
+                write_cache(CACHE_FNAME, CACHE_DICTION)
         except:
             print("error when reading from url")
             d = {}
@@ -117,12 +152,13 @@ def decade_rating_chart(data):
     for a,b in data:
         names.append(a)
         values.append(b)
-    plt.bar(names,values,color=['red', 'green', 'blue', 'purple'])
+    plt.plot(names,values)
     axes = plt.gca()
-    axes.set_ylim([3.5,4.5])
+    axes.set_ylim([3.75,4.25])
     plt.ylabel('Rating (out of 5)')
     plt.xlabel('Decade')
     plt.suptitle('Average rating of Mario games by decade of release')
+    plt.grid()
     plt.show()
 
 def write_to_txt(data):
@@ -136,25 +172,46 @@ def write_to_txt(data):
             txtfile.write('\n')
     txtfile.close()
 
+print("Doing some program setup...")
 mario = get_mario_data()
 cur, conn = setUpDatabase('videogames.db')
 make_mario_database(mario, cur, conn)
 data = decade_rate(mario, cur, conn)
-decade_rating_chart(data)
-write_to_txt(data)
+# decade_rating_chart(data)
+# write_to_txt(data)
+
+
+print("""Welcome to the Mario video game decade rater.
+This program will visualize the average rating for each decade of Mario games.""")
+print("This program utilizes RAWG Video Games Database API, and created for the purpose of SI 206 Fall 2019 semester final project.")
+print("What would you like to do?")
+print("----------")
+
+print("(1) show the graph")
+print("(2) write the data to a text file")
+print("(q) quit the program")
+
+print("----------")
+
+userInput = input("Enter a number or 'q' to quit: ")
+
+while userInput != 'q':
+    if userInput == '1':
+        decade_rating_chart(data)
+        print("Cool chart, rigt?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
+    elif userInput =='2':
+        write_to_txt(data)
+        print("Just wrote the data to a text file for you.")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
+    else:
+        print("That's not a valid input....Please try again")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
 cur.close()
 conn.close()
-
-# print("""Welcome to the Mario video game decade rater.
-# This program will visualize the average rating for each decade of Mario games.""")
-# print("This program utilizes RAWG Video Games Database API, and created for the purpose of SI 206 Fall 2019 semester final project.")
-# print("What would you like to do?")
-# print("----------")
-
-# print("(1) show the graph")
-# print("(2) write the data to a text file")
-# print("(3) quit the program")
-
-# print("----------")
-
-# userInput = input("Enter a number: ")
+print("Bye!")
