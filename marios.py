@@ -7,7 +7,20 @@ import csv
 import matplotlib
 import matplotlib.pyplot as plt
 
+"""
+Project Members: Dylan Yono, SoJung Ham
+About: This program collects data from the RAWG Video Games Database API.
+It searches for Mario games published by Nintendo.
+Then, it collects the game's rating (from RAWG users) and release date.
+The information is put into a database and games are sorted by decade.
+The program may visualize the average rating of each Mario game per decade.
+The program may also write the data to a text file.
+"""
+
 def setUpDatabase(db_name):
+    """
+    This function sets up a database.
+    """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     return cur, conn
@@ -38,11 +51,20 @@ def write_cache(cache_file, cache_dict):
     fw.close()
     
 def get_mario_data():
+    """
+    This function puts all the Mario data into a dictionary with each page of games as the key.
+    It will first try to get each page of up to 20 games from the cache.
+    If that page of games is already in the cache, it will request the page from the API.
+    If it has to request from the API, it will break out of the loop.
+    It returns a dictionary with the key being the page, and the value being the (up to 20) games on that page.
+    (The program will close if the dictionary this function returns does not have all 8 pages of game data.)
+    """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "mario_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
     d={}
     pages=[1,2,3,4,5,6,7,8]
+    headers = {'User-Agent': 'Mario Game Decade Rater','From': 'dyono@umich.edu'}
     for x in pages:
         try:
             url = "https://api.rawg.io/api/games?page={}&page_size=20&search=mario&publishers=nintendo".format(x)
@@ -51,16 +73,24 @@ def get_mario_data():
                 d[x] = CACHE_DICTION[url]
             else:
                 print("Requesting the data from the API...")
-                r = requests.get(url)
+                r = requests.get(url, headers=headers)
                 d[x] = json.loads(r.text)
                 CACHE_DICTION[url] = d[x]
                 write_cache(CACHE_FNAME, CACHE_DICTION)
+                break
         except:
             print("error when reading from url")
             d = {}
     return d
 
 def make_mario_database(mario, cur, conn):
+    """
+    This function makes two database tables.
+    One consists of each Mario Game and its rating.
+    The other consists of each Mario Game and its release date.
+    Both tables share a primary key, the game's id number from the API.
+    """
+    # Make the table of game ratings
     cur.execute("DROP TABLE IF EXISTS MarioRatings")
     cur.execute('''CREATE TABLE MarioRatings 
     (id INTEGER PRIMARY KEY, game_name STRING, rating STRING)''')
@@ -72,7 +102,7 @@ def make_mario_database(mario, cur, conn):
             _rating = x["rating"]
             cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (_id, _game_name, _rating))
     conn.commit()
-    
+    # Make the table of game release dates
     cur.execute("DROP TABLE IF EXISTS MarioReleaseDates")
     cur.execute('''CREATE TABLE MarioReleaseDates 
     (id INTEGER PRIMARY KEY, game_name STRING, release_date STRING)''')
@@ -86,6 +116,12 @@ def make_mario_database(mario, cur, conn):
     conn.commit() 
 
 def decade_rate(mario, cur, conn):
+    """
+    This function does all the data calculation.
+    It converts each release date into a release decade and then creates a table of decades.
+    Using the game id, a database join selects the game name, rating, and decade of release.
+    It returns a list of tuples with each decade and the average Mario game rating.
+    """
     # First, convert release date data into a decade, then create a new table of decades
     cur.execute("SELECT id, game_name, release_date FROM MarioReleaseDates")
     original_release_tuples = cur.fetchall()
@@ -174,12 +210,16 @@ def write_to_txt(data):
 
 print("Doing some program setup...")
 mario = get_mario_data()
+if len(mario) < 8:
+    print("""The program has written some data to the cache.
+    We haven't collected every Mario game yet, though.
+    You'll have to run the program again to collect more data.
+    When every Mario game is in the cache, we can set up the program.
+    For now, the program will exit. Thanks!""")
+    quit()
 cur, conn = setUpDatabase('videogames.db')
 make_mario_database(mario, cur, conn)
 data = decade_rate(mario, cur, conn)
-# decade_rating_chart(data)
-# write_to_txt(data)
-
 
 print("""Welcome to the Mario video game decade rater.
 This program will visualize the average rating for each decade of Mario games.""")
