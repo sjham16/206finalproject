@@ -5,7 +5,6 @@ import sqlite3
 import time
 import csv
 
-
 import matplotlib
 import matplotlib.pyplot as plt
 
@@ -45,13 +44,22 @@ def write_cache(cache_file, cache_dict):
     This function encodes the cache dictionary (cache_dict) into JSON format and
     writes the contents in the cache file (cache_file) to save the search results.
     """
-    dumped_json_cache = json.dumps(cache_dict) #seriailze a dictionary to JSON
-    fw = open(cache_file, "w") #open cache file 
-    fw.write(dumped_json_cache) #write the json into the cache 
-    fw.close() #close the filw 
+    dumped_json_cache = json.dumps(cache_dict) 
+    fw = open(cache_file, "w") 
+    fw.write(dumped_json_cache) 
+    fw.close() 
     
 def get_data_with_caching():
-
+    """
+    This function first extracts data from the supplied URL with the requests module --> json.
+    The file is a key-value pair of the pokemon name, and the url leading to its data. 
+    Within a for loop, if the url exists in the CACHE_DICTION (cache dictionary), it prints out the data 
+    and adds it to an empty dictionary. 
+    If the url does not exist within CACHE_DICTION, it proceeds to get the data and add to the cache. 
+    It only extracts 20 items at a time, so this program must be rerun to gain sufficient data.
+    Finally, it returns data in the form of a dictionary. 
+    
+    """
     request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
     myDict = {}
     
@@ -91,7 +99,12 @@ def get_data_with_caching():
 #------------------- setting up table stuff ---------------------
 
 def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
-    
+    """
+    Taking inputs of pokemon_data, the cur, and conn, this function sets up a table called "PokemonStats"
+    with headers of the pokemon's id, name, and base stats as well as their typing in the form of an ID
+    and injects data from pokemon_data. 
+
+    """
     cur.execute("DROP TABLE IF EXISTS PokemonStats")
     cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
@@ -132,7 +145,9 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
         conn.commit()
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
-
+    """
+    This function creates a category type table, where it's just the pokemon ID and their types.
+    """
     cur.execute("DROP TABLE IF EXISTS PokemonTypes")
     cur.execute('''CREATE TABLE PokemonTypes (pokemon_id INTEGER PRIMARY KEY, 
                                         type_1 STRING, type_2 STRING)''')
@@ -150,7 +165,9 @@ def setUpPokemonTypeTable(pokemon_data, cur, conn):
     conn.commit()
 
 def setUpTypeCategories(pokemon_data, cur, conn):
-    
+    """
+    This function creates a table "TypeCategories", where each type is assigned a primary key.
+    """
     cur.execute("DROP TABLE IF EXISTS TypeCategories")
     cur.execute("CREATE TABLE TypeCategories (id INTEGER PRIMARY KEY, title TEXT)")
     category_list = []
@@ -169,6 +186,9 @@ def setUpTypeCategories(pokemon_data, cur, conn):
 
 #this is added A pokemon's type ID number to their respective stats. 
 def getPokemonTypeAndStats(cur, conn):
+    """
+    This function joins the tables PokemonStats and PokemonTypes at id to their respective stats.
+    """
     cur.execute('''SELECT PokemonStats.pokemon_name, PokemonTypes.type_1, PokemonTypes.type_2 FROM PokemonStats 
                 INNER JOIN PokemonTypes ON PokemonStats.pokemon_id = PokemonTypes.pokemon_id''')
     lst = cur.fetchall()
@@ -176,6 +196,10 @@ def getPokemonTypeAndStats(cur, conn):
 
 #----------------- average base stats calculations------------------------
 def getAverageSpeedStats(pokemon_type, cur, conn):
+    """
+    With a user-inputted pokemon_type, this function calculates the average speed stat from the 
+    base speed column and returns the average value.
+    """
     
     cur.execute("SELECT id FROM TypeCategories WHERE title =? LIMIT 1", (pokemon_type, ))
     type_id = cur.fetchall()[0][0]
