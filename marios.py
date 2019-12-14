@@ -16,6 +16,9 @@ The information is put into a database and games are sorted by decade.
 The program may visualize the average rating of each Mario game per decade.
 The program may also write the data to a text file.
 """
+############################
+# Setting up the functions #
+############################
 
 def setUpDatabase(db_name):
     """
@@ -183,6 +186,10 @@ def decade_rate(mario, cur, conn):
     return avg_by_decade
 
 def decade_rating_chart(data):
+    """
+    This function makes a line chart showing the average rating of Mario games by decade of release.
+    It takes the data from decade_rate as input and shows a graph of the data using MatPlotLib.
+    """
     names=[]
     values=[]
     for a,b in data:
@@ -198,6 +205,10 @@ def decade_rating_chart(data):
     plt.show()
 
 def write_to_txt(data):
+    """
+    This function takes the data from decade_rate as input.
+    It creates a text file of the data with each item on a new line.
+    """
     lst = []
     for x in data:
         lst.append(str(x[0]))
@@ -207,6 +218,10 @@ def write_to_txt(data):
             txtfile.write(x)
             txtfile.write('\n')
     txtfile.close()
+
+###############
+# The program #
+###############
 
 print("Doing some program setup...")
 mario = get_mario_data()

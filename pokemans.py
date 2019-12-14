@@ -53,55 +53,40 @@ def write_cache(cache_file, cache_dict):
 def get_data_with_caching():
 
     request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
-
+    myDict = {}
     
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
+    
     try:
-        if request_url in CACHE_DICTION:
-        
-            print("Using pokemon cache")
-            #add them to a dictionary, where key = request_url and value = results
-            #uhhhhhhhhhhhhhhhhhhh
-            
-            
-            #pull the last stored pokemon id from the database (max value in id)
-            #increment id
-            #repeat 20 times:
-                #pull corresponding pokemone with id
-                #increment id
-
-
-            return CACHE_DICTION[request_url]
-        
-        #exception
-        
-        else: #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
-        
-            print("Fetching")
-            ugh = requests.get(request_url)
-            all_pokemon = json.loads(ugh.text)
-
-            myDict = {}
-                     
-            number = 1
-            for x in all_pokemon['results']:
-                url = x["url"]
-                r = requests.get(url)
-                info = json.loads(r.text)
-                myDict[number] =  info
-                number += 1
-            
-            
-            
-            CACHE_DICTION[request_url] = myDict
-                #write out the dictionary to a file using the function write_cache   
-            write_cache(CACHE_FNAME, CACHE_DICTION)
-            return myDict
+        ugh = requests.get(request_url)
+        all_pokemon = json.loads(ugh.text)
     except:
-        print("Exception")
-        return None
+        print("Error when reading from URL")
+        return myDict
+    
+    number = 1
+    index = 0
+    for x in all_pokemon['results']:
+        url = x["url"]
+        if url in CACHE_DICTION:
+            print("Getting data from the cache")
+            myDict[number] = CACHE_DICTION[url]
+            number +=1
+        else:
+            print("Getting data from the api")
+            r = requests.get(url)
+            info = json.loads(r.text)
+            myDict[number] =  info
+            CACHE_DICTION[url] = myDict[number]
+            write_cache(CACHE_FNAME, CACHE_DICTION)
+            number += 1
+            index +=1
+            if index == 20:
+                break
+            
+    return myDict
 
 #------------------- setting up table stuff ---------------------
 
@@ -144,12 +129,7 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
 
         cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
                                                 (_pokemon_id, _pokemon_name, _speed, _special_defense, _special_attack, _defense, _attack, _hp, _type_1, _type_2))
-        count = count + 1
         conn.commit()
-
-        if count % 10 == 0:
-            print("Pausing for a bit....")
-            time.sleep(1)
 
 def setUpPokemonTypeTable(pokemon_data, cur, conn):
 
@@ -338,7 +318,9 @@ def createAverageSpecialDefenseGraph():
         specialDefenseStats[_type] = getAverageSpecialDefenseStats(_type, cur, conn)
 
 
-    plt.bar(specialDefenseStats.keys(), specialDefenseStats.values())
+    plt.bar(specialDefenseStats.keys(), specialDefenseStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -353,7 +335,9 @@ def createAverageSpecialAttackGraph():
         specialAttackStats[_type] = getAverageSpecialAttackStats(_type, cur, conn)
 
 
-    plt.bar(specialAttackStats.keys(), specialAttackStats.values())
+    plt.bar(specialAttackStats.keys(), specialAttackStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -368,7 +352,9 @@ def createAverageDefenseGraph():
         defenseStats[_type] = getAverageDefenseStats(_type, cur, conn)
 
 
-    plt.bar(defenseStats.keys(), defenseStats.values())
+    plt.bar(defenseStats.keys(), defenseStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -383,7 +369,9 @@ def createAverageAttackGraph():
         attackStats[_type] = getAverageAttackStats(_type, cur, conn)
 
 
-    plt.bar(attackStats.keys(), attackStats.values())
+    plt.bar(attackStats.keys(), attackStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -398,7 +386,9 @@ def createAverageHPGraph():
         HPStats[_type] = getAverageHPStats(_type, cur, conn)
 
 
-    plt.bar(HPStats.keys(), HPStats.values())
+    plt.bar(HPStats.keys(), HPStats.values(), color=['#c300c9', 
+    '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
+    '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
 
     plt.ylabel('Points of Pokemon')
     plt.xlabel('Types')
@@ -406,7 +396,15 @@ def createAverageHPGraph():
     plt.show()
 
 #-----  set up main area -----
+print("Doing some program setup...")
 pokemon_data = get_data_with_caching()
+if len(pokemon_data) < 151:
+    print("""The program has written some data to the cache.
+    We haven't collected all of the original 151 Pokemon yet, though.
+    You'll have to run the program again to collect more data.
+    When all 151 Pokemon are in the cache, we can set up the program.
+    For now, the program will exit. Thanks!""")
+    quit()
 cur, conn = setUpDatabase('videogames.db')
 
 setUpTypeCategories(pokemon_data, cur, conn)
@@ -417,7 +415,7 @@ getPokemonTypeAndStats(cur, conn)
 
 #----- program
 
-print("Welcome to the pokemon base stat viewer. Here you can view average base stats of each pokemon typing. Quite insightful!")
+print("Welcome to the pokemon base stat viewer. Here you can view average base stats of each Pokemon typing for the original 151 Pokemon. Quite insightful!")
 print("This program utilizes pokeapi.com, and created for the purpose of SI 206 Fall 2019 semester final project.")
 print("What kind of data would you like to visualize?")
 print("----------")
