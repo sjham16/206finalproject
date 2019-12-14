@@ -195,7 +195,7 @@ def decade_rating_chart(data):
     for a,b in data:
         names.append(a)
         values.append(b)
-    plt.plot(names,values)
+    plt.plot(names,values, color="red", linewidth=3,linestyle="-")
     axes = plt.gca()
     axes.set_ylim([3.75,4.25])
     plt.ylabel('Rating (out of 5)')
