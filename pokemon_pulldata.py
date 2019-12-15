@@ -37,6 +37,7 @@ def setUpDatabase(db_name):
     except:
         cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (1,'placeholder','_', '_', '_', '_', '_', '_', '_', '_'))
         print("anna oop")
+        conn.commit()
 
     return cur, conn
     
