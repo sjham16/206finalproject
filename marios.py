@@ -23,6 +23,7 @@ The program may also write the data to a text file.
 def setUpDatabase(db_name):
     """
     This function sets up a database.
+    It takes a filename to name the database and returns a cursor and connection.
     """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
@@ -40,7 +41,6 @@ def read_cache(CACHE_FNAME):
         cache_file.close()
     except:
         CACHE_DICTION = {}
-    
     return CACHE_DICTION
 
 def write_cache(cache_file, cache_dict):
@@ -86,10 +86,10 @@ def get_mario_data():
             d = {}
     return d
 
-def make_mario_database(mario, cur, conn):
+def make_mario_database(cur, conn):
     """
-    This function makes two database tables.
-    One consists of each Mario Game and its rating.
+    This function makes two database tables. It takes a cursor and connection as input.
+    One table consists of each Mario Game and its rating.
     The other consists of each Mario Game and its release date.
     Both tables share a primary key, the game's id number from the API.
     """
@@ -118,9 +118,9 @@ def make_mario_database(mario, cur, conn):
             cur.execute('INSERT INTO MarioReleaseDates (id, game_name, release_date) VALUES(?, ?, ?)', (_id, _game_name, _release_date))
     conn.commit() 
 
-def decade_rate(mario, cur, conn):
+def decade_rate(cur, conn):
     """
-    This function does all the data calculation.
+    This function does all the data calculation. It takes a cursor and connection as input.
     It converts each release date into a release decade and then creates a table of decades.
     Using the game id, a database join selects the game name, rating, and decade of release.
     It returns a list of tuples with each decade and the average Mario game rating.
@@ -233,8 +233,8 @@ if len(mario) < 8:
     For now, the program will exit. Thanks!""")
     quit()
 cur, conn = setUpDatabase('videogames.db')
-make_mario_database(mario, cur, conn)
-data = decade_rate(mario, cur, conn)
+make_mario_database(cur, conn)
+data = decade_rate(cur, conn)
 
 print("""Welcome to the Mario video game decade rater.
 This program will visualize the average rating for each decade of Mario games.""")
