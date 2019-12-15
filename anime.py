@@ -4,20 +4,38 @@ import os
 import unittest
 import sqlite3
 import time
-
-
 import matplotlib
 import matplotlib.pyplot as plt
 
+"""
+Project Members: SoJung Ham, Dylan Yono
+Information: 
+"""
 
-
-#Project Members: SoJung Ham, Dylan Yono
-#Information: 
+############################
+# Setting up the functions #
+############################
 
 def setUpDatabase(db_name):
+    """
+    This function sets up a database.
+    It takes a filename to name the database and returns a cursor and connection.
+    """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-
+    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeRatings 
+    (id INTEGER, title STRING, score STRING)''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeSource 
+    (id INTEGER, title STRING, source STRING)''')
+    try:
+        cur.execute('SELECT * FROM AnimeRatings')
+        test = len(cur.fetchall())
+        if test == 0:
+            return cur, conn
+        else:
+            error
+    except:
+        cur.execute('INSERT INTO AnimeRatings (id, title, score) VALUES(?, ?, ?)', (1,'placeholder','_'))
     return cur, conn
     
 def read_cache(CACHE_FNAME):
@@ -25,15 +43,13 @@ def read_cache(CACHE_FNAME):
     This function reads from the JSON cache file and returns a dictionary from the cache data. 
     If the file doesn’t exist, it returns an empty dictionary.
     """
-
     try:
-        cache_file = open(CACHE_FNAME, 'r', encoding="utf-8") # Try to read the data from the file
-        cache_contents = cache_file.read()  # If it's there, get it into a string
-        CACHE_DICTION = json.loads(cache_contents) # And then load it into a dictionary
-        cache_file.close() # Close the file, we're good, we got the data in a dictionary.
+        cache_file = open(CACHE_FNAME, 'r', encoding="utf-8")
+        cache_contents = cache_file.read()
+        CACHE_DICTION = json.loads(cache_contents)
+        cache_file.close()
     except:
         CACHE_DICTION = {}
-    
     return CACHE_DICTION
 
 def write_cache(cache_file, cache_dict):
@@ -41,47 +57,67 @@ def write_cache(cache_file, cache_dict):
     This function encodes the cache dictionary (cache_dict) into JSON format and
     writes the contents in the cache file (cache_file) to save the search results.
     """
-    dumped_json_cache = json.dumps(cache_dict) #seriailze a dictionary to JSON
-    fw = open(cache_file, "w") #open cache file 
-    fw.write(dumped_json_cache) #write the json into the cache 
-    fw.close() #close the filw 
+    dumped_json_cache = json.dumps(cache_dict)
+    fw = open(cache_file, "w")
+    fw.write(dumped_json_cache)
+    fw.close()
     
-def get_data_with_caching(year):
-
-
-      
-    base_url = "https://api.jikan.moe/v3/search/anime?q={}&limit=101"
-    request_url = base_url.format(year)
-    
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
-    CACHE_DICTION  = read_cache(CACHE_FNAME)
-
-    try:
-        if request_url in CACHE_DICTION:
+def get_anime_data():
+    request_url = "https://api.jikan.moe/v3/season/1988/winter"
+    r = requests.get(request_url)
+    search_data = json.loads(r.text)
+    count = len(search_data["anime"])
+    print("winter")
+    print(count)
+    time.sleep(3)
+    request_url = "https://api.jikan.moe/v3/season/1988/spring"
+    r = requests.get(request_url)
+    search_data = json.loads(r.text)
+    count = len(search_data["anime"])
+    print("spring")
+    print(count)
+    time.sleep(3)
+    request_url = "https://api.jikan.moe/v3/season/1988/summer"
+    r = requests.get(request_url)
+    search_data = json.loads(r.text)
+    count = len(search_data["anime"])
+    print("summer")
+    print(count)
+    time.sleep(3)
+    request_url = "https://api.jikan.moe/v3/season/1988/fall"
+    r = requests.get(request_url)
+    search_data = json.loads(r.text)
+    count = len(search_data["anime"])
+    print("fall")
+    print(count)
+    # dir_path = os.path.dirname(os.path.realpath(__file__))
+    # CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
+    # CACHE_DICTION  = read_cache(CACHE_FNAME)
+    # try:
+    #     if request_url in CACHE_DICTION:
             
-                print("Using jikan anime_list cache")
-                return CACHE_DICTION[request_url]
+    #             print("Using jikan anime_list cache")
+    #             return CACHE_DICTION[request_url]
             
-        else: 
-                    #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
-            print("Fetching")
-            ugh = requests.get(request_url)
-            all_anime = json.loads(ugh.text)
+    #     else: 
+    #                 #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
+    #         print("Fetching")
+    #         ugh = requests.get(request_url)
+    #         all_anime = json.loads(ugh.text)
 
-            CACHE_DICTION[request_url] = all_anime
-            write_cache(CACHE_FNAME, CACHE_DICTION)                    
-    except:
-        print("Exception")
-        return None
+    #         CACHE_DICTION[request_url] = all_anime
+    #         write_cache(CACHE_FNAME, CACHE_DICTION)                    
+    # except:
+    #     print("Exception")
+    #     return None
     
-    return all_anime
+    # return all_anime
     
     #need to find a way to get 50 animes
     
 #---------- database setup --------
 
-def setUpAnimeInfoTable(anime_data, cur, conn):
+""" def setUpAnimeInfoTable(anime_data, cur, conn):
     cur.execute("DROP TABLE IF EXISTS Anime")
     cur.execute('''CREATE TABLE Anime (anime_id INTEGER PRIMARY KEY, name TEXT,
                                         score INTEGER, rated TEXT, rated_id INTEGER)''')
@@ -180,8 +216,8 @@ createAverageScoreGraph()
 # with open('anime_calc.csv', 'c', newline='') as csvfile:
 #     fields = ['anime_id', 'name', 'average score', 'rated']
 
-#please select what year you want to compare to .... ?
+#please select what year you want to compare to .... ? """
 
-
+get_anime_data()
 
 
