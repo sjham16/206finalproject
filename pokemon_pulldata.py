@@ -21,11 +21,11 @@ def setUpDatabase(db_name):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
+    cur.execute('''CREATE TABLE IF NOT EXISTS PokemonStats (pokemon_id INTEGER, pokemon_name TEXT,
                                         speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
                                         defense INTEGER, attack INTEGER, hp INTEGER, type_1 INTEGER, type_2 INTEGER)''')
 
-    cur.execute('''CREATE TABLE IF NOT EXISTS PokemonStats (id INTEGER PRIMARY KEY, title TEXT)''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS TypeCategories (id INTEGER, title TEXT)''')
 
     try:
         cur.execute('SELECT * FROM PokemonStats')
@@ -33,9 +33,10 @@ def setUpDatabase(db_name):
         if test == 151:
             return cur, conn
         else: 
-            print("error")
+            error
     except:
-        cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (1, 'placeholder', '_','_','_','_','_', ))
+        cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (1,'placeholder','_', '_', '_', '_', '_', '_', '_', '_'))
+        print("anna oop")
 
     return cur, conn
     
@@ -84,11 +85,11 @@ def get_data_with_caching(cur, conn):
     CACHE_DICTION  = read_cache(CACHE_FNAME)
 
     try:
-        cur.execute('''SELECT id FROM PokemonStats WHERE name = "placeholder"''')
+        cur.execute('''SELECT id FROM PokemonStats WHERE pokemon_name = "placeholder"''')
         page = cur.fetch()[0]
         print("pulling data from page below:")
         print(page)
-        cur.execute('''DELETE From PokemonStats WHERE name = "placeholder"''')
+        cur.execute('''DELETE From PokemonStats WHERE pokemon_name = "placeholder"''')
         conn.commit()
     except:
         return None
@@ -170,10 +171,24 @@ def get_data_with_caching(cur, conn):
             
 
 
-print("lets do some program set up")
+#--------------we setting up here-----------------
 cur, conn = setUpDatabase('videogames.db')
 pokemon = get_data_with_caching(cur, conn)
                 
+cur.execute('SELECT * FROM PokemonStats')
+tester = len(cur.fetchall())
+if tester == 151:
+    cur.execute('''DELETE FROM PokemonStats WHERE pokemon_name = "placeholder"''')
+elif tester != 150:
+    print("""The program has saved some data to the database.
+    We haven't caught all the Pokemon yet though. 
+    You'll have to run the program again to collect more data.
+    When every Pokemon we need  is in the database, we can set up the program.
+    For now, the program will exit. Keep running it until it works!!""")
+    quit()
+
+conn.close()
+
         
     
     # try:
