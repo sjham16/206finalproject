@@ -60,41 +60,46 @@ def get_data_with_caching():
     Finally, it returns data in the form of a dictionary. 
     
     """
-    request_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
-    myDict = {}
     
+    myDict = {}
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
-    
     try:
-        ugh = requests.get(request_url)
-        all_pokemon = json.loads(ugh.text)
-    except:
-        print("Error when reading from URL")
-        return myDict
+        cur.execite(''')
+
+    try:
+        base_url = "https://pokeapi.co/api/v2/pokemon/?page={}".format(page)
+        
     
-    number = 1
-    index = 0
-    for x in all_pokemon['results']:
-        url = x["url"]
-        if url in CACHE_DICTION:
-            print("Getting data from the cache")
-            myDict[number] = CACHE_DICTION[url]
-            number +=1
-        else:
-            print("Getting data from the api")
-            r = requests.get(url)
-            info = json.loads(r.text)
-            myDict[number] =  info
-            CACHE_DICTION[url] = myDict[number]
-            write_cache(CACHE_FNAME, CACHE_DICTION)
-            number += 1
-            index +=1
-            if index == 20:
-                break
+    # try:
+    #     ugh = requests.get(request_url)
+    #     all_pokemon = json.loads(ugh.text)
+    # except:
+    #     print("Error when reading from URL")
+    #     return myDict
+    
+    # number = 1
+    # index = 0
+    # for x in all_pokemon['results']:
+    #     url = x["url"]
+    #     if url in CACHE_DICTION:
+    #         print("Getting data from the cache")
+    #         myDict[number] = CACHE_DICTION[url]
+    #         number +=1
+    #     else:
+    #         print("Getting data from the api")
+    #         r = requests.get(url)
+    #         info = json.loads(r.text)
+    #         myDict[number] =  info
+    #         CACHE_DICTION[url] = myDict[number]
+    #         write_cache(CACHE_FNAME, CACHE_DICTION)
+    #         number += 1
+    #         index +=1
+    #         if index == 20:
+    #             break
             
-    return myDict
+    # return myDict
 
 #------------------- setting up table stuff ---------------------
 
