@@ -68,12 +68,10 @@ def write_cache(cache_file, cache_dict):
     
 def get_mario_data(cur, conn):
     """
-    This function puts all the Mario data into a dictionary with each page of games as the key.
-    It will first try to get each page of up to 20 games from the cache.
-    If that page of games is already in the cache, it will request the page from the API.
-    If it has to request from the API, it will break out of the loop.
-    It returns a dictionary with the key being the page, and the value being the (up to 20) games on that page.
-    (The program will close if the dictionary this function returns does not have all 8 pages of game data.)
+    This function loads up to 20 items from the cache or API into the database.
+    It also adds a placeholder item to the database to track which page of data
+    to collect each time the code runs.
+    It takes a cursor and connection as input.
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "mario_cache.json"
@@ -87,9 +85,9 @@ def get_mario_data(cur, conn):
         cur.execute('''DELETE FROM MarioRatings WHERE game_name = "placeholder"''')
         conn.commit()
     except:
-        return d
+        return None
     if page == 9:
-        return d
+       return None
     headers = {'User-Agent': 'Mario Game Decade Rater','From': 'dyono@umich.edu'}
     try:
         url = "https://api.rawg.io/api/games?page={}&page_size=20&search=mario&publishers=nintendo".format(page)
@@ -125,7 +123,6 @@ def get_mario_data(cur, conn):
     except:
         print("error when reading from url")
         d = {}
-    return d
 
 def decade_rate(cur, conn):
     """
@@ -235,10 +232,13 @@ def write_to_txt(data):
 print("Doing some program setup...")
 cur, conn = setUpDatabase('videogames.db')
 mario = get_mario_data(cur, conn)
+
+# Check to see if all 145 games are in the database
 cur.execute('SELECT * FROM MarioRatings')
 tester = len(cur.fetchall())
 if tester == 146:
     cur.execute('''DELETE FROM MarioRatings WHERE game_name = "placeholder"''')
+    # This deletes the placeholder row that tracks which page to pull data from in the get_mario_data function
 elif tester != 145:
     print("""The program has saved some data to the database.
     We haven't collected every Mario game yet, though.
