@@ -35,7 +35,7 @@ def setUpDatabase(db_name):
         else: 
             error
     except:
-        cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (1,'placeholder','_', '_', '_', '_', '_', '_', '_', '_'))
+        cur.execute('INSERT OR IGNORE INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (1,'placeholder','_', '_', '_', '_', '_', '_', '_', '_'))
         print("anna oop")
         conn.commit()
 
@@ -86,7 +86,7 @@ def get_data_with_caching(cur, conn):
     CACHE_DICTION  = read_cache(CACHE_FNAME)
 
     try:
-        cur.execute('''SELECT id FROM PokemonStats WHERE pokemon_name = "placeholder"''')
+        cur.execute('''SELECT pokemon_id FROM PokemonStats WHERE pokemon_name = "placeholder"''')
         page = cur.fetch()[0]
         print("pulling data from page below:")
         print(page)
