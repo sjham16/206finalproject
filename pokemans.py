@@ -66,7 +66,7 @@ def get_data_with_caching():
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
     try:
-        cur.execite(''')
+        pass
 
     try:
         base_url = "https://pokeapi.co/api/v2/pokemon/?page={}".format(page)
