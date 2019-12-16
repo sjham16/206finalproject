@@ -114,7 +114,7 @@ def get_data_with_caching(cur, conn):
                 url = x["url"]
                 r = requests.get(url)
                 pokemon = json.loads(r.text)
-                print("lets get these pokemon")
+                print("lets get these pokemon from the cache")
 
 
                 _pokemon_id = pokemon['id']
@@ -129,26 +129,23 @@ def get_data_with_caching(cur, conn):
 
                 category = pokemon['types']
 
-                type1 = category[0]['type']['name']
-                cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type1, ))
-                c = cur.fetchone()[0]
-                _type_1 = c
-                _type_2 = ""
+                _type_1 = category[0]['type']['name']
+                _type_2 = "_"
 
-                if len(category) == 2:
-                    type2 = category[1]['type']['name']
-                    cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type2, ))
-                    d = cur.fetchone()[0]
-                    _type_2 = d
+                if len(category) > 1:
+                    _type2 = category[1]['type']['name']
+                    
                 cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
                                                     (_pokemon_id, _pokemon_name, _speed, _special_defense, _special_attack, _defense, _attack, _hp, _type_1, _type_2))
-                conn.commit()
-                print("wrote the items to the database from the cache")
+            cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (page+1, 'placeholder', '_', '_', '_', '_', '_', '_', '_'))
+
+            conn.commit()
         else:
             print("Requesting data from the Pokemon APi....")
-            r = requests.get(url)
+
+            r = requests.get(request_url)
             myDict[page] = json.loads(r.text)
-            CACHE_DICTION[url] = myDict[page]
+            CACHE_DICTION[request_url] = myDict[page]
             write_cache(CACHE_FNAME, CACHE_DICTION)
 
             for x in myDict[page]['results']:
@@ -156,11 +153,10 @@ def get_data_with_caching(cur, conn):
                 url = x["url"]
                 r = requests.get(url)
                 pokemon = json.loads(r.text)
-                print("lets get these pokemon")
-                
+                print("getting pokemon from their API")
+
                 _pokemon_id = pokemon['id']
                 _pokemon_name = pokemon['species']['name']
-                #something here....list indices not string but its a dictionary..??
                 _speed = pokemon['stats'][0]['base_stat']
                 _special_defense = pokemon['stats'][1]['base_stat']
                 _special_attack = pokemon['stats'][2]['base_stat']
@@ -170,24 +166,20 @@ def get_data_with_caching(cur, conn):
 
                 category = pokemon['types']
 
-                type1 = category['type']['name']
-                cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type1, ))
-                c = cur.fetchone()[0]
-                _type_1 = c
+                _type1 = category[0]['type']['name']
                 _type_2 = ""
 
                 if len(category) == 2:
-                    type2 = category[1]['type']['name']
-                    cur.execute("SELECT id FROM TypeCategories WHERE title = ? LIMIT 1", (type2, ))
-                    d = cur.fetchone()[0]
-                    _type_2 = d
+                    _type2 = category[1]['type']['name']
+                    
                 cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', 
                                                 (_pokemon_id, _pokemon_name, _speed, _special_defense, _special_attack, _defense, _attack, _hp, _type_1, _type_2))
-                conn.commit()
-                print("wrote the items to the database from the API")
+            cur.execute('INSERT INTO PokemonStats (pokemon_id, pokemon_name, speed, special_defense, special_attack, defense, attack, hp, type_1, type_2) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', (page+1, 'placeholder', '_', '_', '_', '_', '_', '_', '_'))
+            conn.commit()
+            print("wrote the items to the database from the API")
     except: 
             print("error when reading from the URL")
-            d = {}
+            myDict = {}
             
 
 
@@ -209,34 +201,3 @@ elif tester != 150:
     quit()
 
 conn.close()
-
-        
-    
-    # try:
-    #     ugh = requests.get(request_url)
-    #     all_pokemon = json.loads(ugh.text)
-    # except:
-    #     print("Error when reading from URL")
-    #     return myDict
-    
-    # number = 1
-    # index = 0
-    # for x in all_pokemon['results']:
-    #     url = x["url"]
-    #     if url in CACHE_DICTION:
-    #         print("Getting data from the cache")
-    #         myDict[number] = CACHE_DICTION[url]
-    #         number +=1
-    #     else:
-    #         print("Getting data from the api")
-    #         r = requests.get(url)
-    #         info = json.loads(r.text)
-    #         myDict[number] =  info
-    #         CACHE_DICTION[url] = myDict[number]
-    #         write_cache(CACHE_FNAME, CACHE_DICTION)
-    #         number += 1
-    #         index +=1
-    #         if index == 20:
-    #             break
-            
-    # return myDict
