@@ -143,7 +143,6 @@ def best_source(cur, conn):
     cur.executemany("INSERT INTO CleanAnimeSources (id, title, source) VALUES(?, ?, ?)", sources_clean)
     conn.commit()
     # Next, calculate the average score for each source using database join
-    cur.execute("SELECT * FROM CleanAnimeSources")
     cur.execute("""SELECT CleanAnimeScores.title, CleanAnimeScores.score, CleanAnimeSources.source FROM CleanAnimeScores
     INNER JOIN CleanAnimeSources ON CleanAnimeScores.id = CleanAnimeSources.id""")
     data = cur.fetchall()

@@ -20,7 +20,9 @@ import matplotlib.pyplot as plt
 def setUpDatabase(db_name):
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-
+    cur.execute('''CREATE TABLE IF NOT EXISTS PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
+                speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
+                defense INTEGER, attack INTEGER, hp INTEGER, type_1 INTEGER, type_2 INTEGER)''')
     return cur, conn
     
 def read_cache(CACHE_FNAME):
@@ -64,42 +66,42 @@ def get_data_with_caching():
     myDict = {}
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
-    CACHE_DICTION  = read_cache(CACHE_FNAME)
+    CACHE_DICTION  = read_cache(CACHE_FNAME)        
+    
+    search_url = "https://pokeapi.co/api/v2/pokemon/?limit=151"
+    
     try:
-        pass
+        r = requests.get(search_url)
+        search_data = json.loads(r.text)
+    except:
+        print("Error when reading from URL")
+        return myDict
+    
+    number = 1
+    for x in search_data['results']:
+        url = x["url"]
+        if url in CACHE_DICTION:
+            print("Getting data from the cache")
+            myDict[number] = CACHE_DICTION[url]
+            number +=1
+        else:
+            print("Getting data from the api")
+            r = requests.get(url)
+            info = json.loads(r.text)
+            myDict[number] =  info
+            CACHE_DICTION[url] = myDict[number]
+            write_cache(CACHE_FNAME, CACHE_DICTION)
 
     try:
-        base_url = "https://pokeapi.co/api/v2/pokemon/?page={}".format(page)
-        
-    
-    # try:
-    #     ugh = requests.get(request_url)
-    #     all_pokemon = json.loads(ugh.text)
-    # except:
-    #     print("Error when reading from URL")
-    #     return myDict
-    
-    # number = 1
-    # index = 0
-    # for x in all_pokemon['results']:
-    #     url = x["url"]
-    #     if url in CACHE_DICTION:
-    #         print("Getting data from the cache")
-    #         myDict[number] = CACHE_DICTION[url]
-    #         number +=1
-    #     else:
-    #         print("Getting data from the api")
-    #         r = requests.get(url)
-    #         info = json.loads(r.text)
-    #         myDict[number] =  info
-    #         CACHE_DICTION[url] = myDict[number]
-    #         write_cache(CACHE_FNAME, CACHE_DICTION)
-    #         number += 1
-    #         index +=1
-    #         if index == 20:
-    #             break
-            
-    # return myDict
+        cur.execute('SELECT * FROM PokemonStats')
+        current = len(cur.fetchall())
+    except:
+        current = 0
+    if current == 151:
+        print("All original 151 Pokemon are in the database.")
+        return None
+
+    return myDict
 
 #------------------- setting up table stuff ---------------------
 
@@ -110,10 +112,6 @@ def setUpPokemonBaseStatsTable(pokemon_data, cur, conn):
     and injects data from pokemon_data. 
 
     """
-    cur.execute("DROP TABLE IF EXISTS PokemonStats")
-    cur.execute('''CREATE TABLE PokemonStats (pokemon_id INTEGER PRIMARY KEY, pokemon_name TEXT,
-                                        speed INTEGER, special_defense INTEGER, special_attack INTEGER, 
-                                        defense INTEGER, attack INTEGER, hp INTEGER, type_1 INTEGER, type_2 INTEGER)''')
     info = pokemon_data.items()
     count = 0
 
