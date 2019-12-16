@@ -9,7 +9,12 @@ import matplotlib.pyplot as plt
 
 """
 Project Members: SoJung Ham, Dylan Yono
-Information: 
+About: This program collects data from the Jikan API utilizing data from MyAnimeList.net.
+It searches for anime that aired during the fall 2019 season.
+Then, it collects the anime's rating (from MAL users) and the source material the anime is adapted from.
+The information is put into a database and the average rating of each source material is calculated.
+The program may visualize the average rating of each source material.
+The program may also write the data to a text file.
 """
 
 ############################
@@ -23,19 +28,10 @@ def setUpDatabase(db_name):
     """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeRatings 
-    (id INTEGER, title STRING, score STRING)''')
-    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeSource 
-    (id INTEGER, title STRING, source STRING)''')
-    try:
-        cur.execute('SELECT * FROM AnimeRatings')
-        test = len(cur.fetchall())
-        if test == 0:
-            return cur, conn
-        else:
-            error
-    except:
-        cur.execute('INSERT INTO AnimeRatings (id, title, score) VALUES(?, ?, ?)', (1,'placeholder','_'))
+    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeScores 
+    (id, title, score)''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS AnimeSources 
+    (id, title, source)''')
     return cur, conn
     
 def read_cache(CACHE_FNAME):
@@ -62,162 +58,189 @@ def write_cache(cache_file, cache_dict):
     fw.write(dumped_json_cache)
     fw.close()
     
-def get_anime_data():
-    request_url = "https://api.jikan.moe/v3/season/1988/winter"
-    r = requests.get(request_url)
-    search_data = json.loads(r.text)
-    count = len(search_data["anime"])
-    print("winter")
-    print(count)
-    time.sleep(3)
-    request_url = "https://api.jikan.moe/v3/season/1988/spring"
-    r = requests.get(request_url)
-    search_data = json.loads(r.text)
-    count = len(search_data["anime"])
-    print("spring")
-    print(count)
-    time.sleep(3)
-    request_url = "https://api.jikan.moe/v3/season/1988/summer"
-    r = requests.get(request_url)
-    search_data = json.loads(r.text)
-    count = len(search_data["anime"])
-    print("summer")
-    print(count)
-    time.sleep(3)
-    request_url = "https://api.jikan.moe/v3/season/1988/fall"
-    r = requests.get(request_url)
-    search_data = json.loads(r.text)
-    count = len(search_data["anime"])
-    print("fall")
-    print(count)
-    # dir_path = os.path.dirname(os.path.realpath(__file__))
-    # CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
-    # CACHE_DICTION  = read_cache(CACHE_FNAME)
-    # try:
-    #     if request_url in CACHE_DICTION:
-            
-    #             print("Using jikan anime_list cache")
-    #             return CACHE_DICTION[request_url]
-            
-    #     else: 
-    #                 #if request_url does not exist in CACHE_DICTION, CREATE THE CACHE
-    #         print("Fetching")
-    #         ugh = requests.get(request_url)
-    #         all_anime = json.loads(ugh.text)
-
-    #         CACHE_DICTION[request_url] = all_anime
-    #         write_cache(CACHE_FNAME, CACHE_DICTION)                    
-    # except:
-    #     print("Exception")
-    #     return None
+def get_anime_data(cur, conn):
+    """
+    This function loads up to 20 items from the cache or API into the database.
+    It takes a cursor and connection as input.
+    """
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
+    CACHE_DICTION  = read_cache(CACHE_FNAME)
     
-    # return all_anime
-    
-    #need to find a way to get 50 animes
-    
-#---------- database setup --------
+    url = "https://api.jikan.moe/v3/season/2019/fall"
+    try:
+        if url in CACHE_DICTION:
+            print("Getting fall 2019 anime data from the cache...")
+            search_data = CACHE_DICTION[url]
+            fa19 = search_data["anime"]
+        else:
+            print("Getting fall 2019 anime data from the API...")
+            r = requests.get(url)
+            search_data = json.loads(r.text)
+            fa19 = search_data["anime"]
+            CACHE_DICTION[url] = search_data
+            write_cache(CACHE_FNAME, CACHE_DICTION)
+    except:
+        print("error when reading from URL")
+        return None
 
-""" def setUpAnimeInfoTable(anime_data, cur, conn):
-    cur.execute("DROP TABLE IF EXISTS Anime")
-    cur.execute('''CREATE TABLE Anime (anime_id INTEGER PRIMARY KEY, name TEXT,
-                                        score INTEGER, rated TEXT, rated_id INTEGER)''')
-    info = anime_data['results']
-    
-    #something is fucked up here
-    count = 0
-
-    for anime in info:
-        _anime_id = anime["mal_id"]
-        _name = anime["title"]
-        _score = anime["score"]
-        _rated = anime['rated']
-        
-        cur.execute("SELECT id FROM Rated WHERE rated = ? LIMIT 1", (_rated, ))
-        c = cur.fetchone()[0]
-        _rated_id = c
-
-
-        cur.execute('INSERT INTO Anime (anime_id, name, score, rated, rated_id) VALUES (?, ?, ?, ?, ?)',
-        (_anime_id, _name, _score, _rated, _rated_id))
-
-        count = count + 1
+    try:
+        cur.execute('SELECT * FROM AnimeScores')
+        current = len(cur.fetchall())
+    except:
+        current = 0
+    if current == 192:
+        print("All fall 2019 anime are in the database.")
+        return None
+    for x in fa19[current:current+20]:
+        _id = x["mal_id"]
+        _title =x["title"]
+        _score =x["score"]
+        _source =x["source"]
+        cur.execute('INSERT INTO AnimeScores (id, title, score) VALUES(?, ?, ?)', (_id, _title, _score))
+        cur.execute('INSERT INTO AnimeSources (id, title, source) VALUES(?, ?, ?)', (_id, _title, _source))
+        print("Added {}, with id {}, scoring {}, from source {} to the database.".format(_title,_id,_score,_source))
+        cur.execute('SELECT * FROM AnimeScores')
+        current = len(cur.fetchall())
         conn.commit()
+    if current == 192:
+        print("All fall 2019 anime are in the database.")
+        return None
+    else:
+        print("Need to add more anime to the database. The program will quit for now. Please run it again.")
+        quit()
 
-        if count % 10 == 0:
-            print("Pausing for a bit....")
-            time.sleep(1)
-
-def setUpRatedTable(anime_data, cur, conn):
-
-    cur.execute("DROP TABLE IF EXISTS Rated")
-    cur.execute("CREATE TABLE Rated (id INTEGER PRIMARY KEY, rated TEXT)")
-
-    genre_list = []
-    info = anime_data['results']
-
-    for x in info:
-        genre = x['rated']
-        if genre not in genre_list:
-            genre_list.append(genre)
-    
-    for i in range(len(genre_list)):
-        cur.execute("INSERT INTO Rated (id, rated) VALUES (?,?)", (i, genre_list[i]))
+def best_source(cur, conn):
+    """
+    This function does all the data calculation. It takes a cursor and connection as input.
+    It cleans all the data and inputs the clean data into new tables.
+    Using the anime id, a database join selects the anime title, score, and source material.
+    It returns a list of tuples with each source and the average rating.
+    """
+    # First, clean the data
+    # Clean the AnimeScores table
+    cur.execute('DROP TABLE IF EXISTS CleanAnimeScores')
+    cur.execute('''CREATE TABLE CleanAnimeScores 
+    (id, title, score)''')
+    cur.execute('SELECT * FROM AnimeScores')
+    scores_raw = cur.fetchall()
+    scores_clean = []
+    for a,b,c in scores_raw:
+        if type(c) == float:
+            scores_clean.append((a,b,c))
+    cur.executemany("INSERT INTO CleanAnimeScores (id, title, score) VALUES(?, ?, ?)", scores_clean)
     conn.commit()
+    # Clean the AnimeSources table
+    cur.execute('DROP TABLE IF EXISTS CleanAnimeSources')
+    cur.execute('''CREATE TABLE CleanAnimeSources 
+    (id, title, source)''')
+    cur.execute('SELECT * FROM AnimeSources')
+    sources_raw = cur.fetchall()
+    sources_clean = []
+    for a,b,c in sources_raw:
+        if c != "-":
+            sources_clean.append((a,b,c))
+    cur.executemany("INSERT INTO CleanAnimeSources (id, title, source) VALUES(?, ?, ?)", sources_clean)
+    conn.commit()
+    # Next, calculate the average score for each source using database join
+    cur.execute("SELECT * FROM CleanAnimeSources")
+    cur.execute("""SELECT CleanAnimeScores.title, CleanAnimeScores.score, CleanAnimeSources.source FROM CleanAnimeScores
+    INNER JOIN CleanAnimeSources ON CleanAnimeScores.id = CleanAnimeSources.id""")
+    data = cur.fetchall()
+    source_list =[]
+    source_scores = {}
+    source_counts = {}
+    for a,b,c in data:
+        if c not in source_list:
+            source_list.append(c)
+        if c not in source_scores:
+            source_scores[c] = b
+        else:
+            source_scores[c] += b
+        if c not in source_counts:
+            source_counts[c] = 1
+        else:
+            source_counts[c] += 1
+    score_by_source = []
+    for source in source_list:
+        avg = source_scores[source] / source_counts[source]
+        score_by_source.append((source,avg))
+    score_by_source = sorted(score_by_source, key=lambda x: x[1], reverse=True)
+    return score_by_source
 
-#----------joining tables ----------------------
-def getAnimeScoreAndRatings(cur, conn):
-    cur.execute('''SELECT Anime.name, Anime.score FROM Anime INNER JOIN Rated ON Anime.rated_id = Rated.id''')
-    lst = cur.fetchall()
-    return lst
-
-#------calculation stuff------------------------
-def getAverageScore(rated, cur, conn):
-
-    cur.execute("SELECT id FROM Rated WHERE rated = ? LIMIT 1", (rated, ))
-    rated_id = cur.fetchall()[0][0]
-    
-    cur.execute("SELECT score FROM Anime WHERE rated_id = ?", (rated_id, ))
-    average = 0
-    total = 0
-    resu = cur.fetchall()
-
-    for anime in resu:
-        total = anime[0] + total
-    average = total / len(resu)
-
-    return average
-#----------------creating a graph-------------------
-def createAverageScoreGraph():
-    scoreStats = {}
-
-    rating_types = ['G','PG', 'PG-13', 'R', 'R+', 'Rx']
-
-    for _type in rating_types:
-        scoreStats[_type] = getAverageScore(_type, cur, conn)
-
-    plt.bar(scoreStats.keys(), scoreStats.values())
-
-    plt.ylabel('Average Score out of 10')
-    plt.xlabel('Rated')
-    plt.title('Does a Rating determine how well it scores?')
+def make_chart(data):
+    """
+    This function makes a bar chart showing the average rating of anime by source material.
+    It takes the data from best_source as input and shows a graph of the data using MatPlotLib.
+    """
+    names=[]
+    values=[]
+    for a,b in data:
+        names.append(a)
+        values.append(b)
+    plt.bar(names,values, color=["#016122","#392f90","#fed1b4","#9f98e6","#0aecc9","#ec4c02","#7bfc88","#3c9883","#c404ef","#df7f2b","#cd128d","#268ab6"],edgecolor="gray")
+    axes = plt.gca()
+    axes.set_ylim([5,8])
+    plt.ylabel('Average Rating (out of 10)')
+    plt.xlabel('Source Material')
+    plt.suptitle('Average rating of fall 2019 anime by source material')
     plt.show()
-#----------set up-----------------------------
-anime_data = get_data_with_caching(2011)
-cur, conn = setUpDatabase('Anime.db')
 
-setUpRatedTable(anime_data, cur, conn)
-setUpAnimeInfoTable(anime_data, cur, conn)
+def write_to_txt(data):
+    """
+    This function takes the data from best_source as input.
+    It creates a text file of the data with each item on a new line.
+    """
+    lst = []
+    for x in data:
+        lst.append(str(x[0]))
+        lst.append(str(x[1]))
+    with open('anime_data.txt', 'w',) as txtfile:
+        for x in lst:
+            txtfile.write(x)
+            txtfile.write('\n')
+    txtfile.close()
 
-print(getAverageScore('R', cur, conn))
-createAverageScoreGraph()
+###############
+# The program #
+###############
 
-#-------------------------------------------------------
+cur, conn = setUpDatabase('videogames.db')
+get_anime_data(cur, conn)
+data = best_source(cur, conn)
 
-# with open('anime_calc.csv', 'c', newline='') as csvfile:
-#     fields = ['anime_id', 'name', 'average score', 'rated']
+print("""Welcome to the anime source material rater.
+This program will visualize the average rating of fall 2019 anime by source material.""")
+print("This program utilizes Jikan API, and created for the purpose of SI 206 Fall 2019 semester final project.")
+print("What would you like to do?")
+print("----------")
 
-#please select what year you want to compare to .... ? """
+print("(1) show the graph")
+print("(2) write the data to a text file")
+print("(q) quit the program")
 
-get_anime_data()
+print("----------")
 
+userInput = input("Enter a number or 'q' to quit: ")
 
+while userInput != 'q':
+    if userInput == '1':
+        make_chart(data)
+        print("Cool chart, right?")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
+    elif userInput =='2':
+        write_to_txt(data)
+        print("Just wrote the data to a text file for you.")
+        print("Anything else you want to do?")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
+    else:
+        print("That's not a valid input....Please try again")
+        userInput = input("Enter a number or 'q' to quit: ")
+        continue
+
+cur.close()
+conn.close()
+print("Bye!")

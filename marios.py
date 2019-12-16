@@ -27,6 +27,20 @@ def setUpDatabase(db_name):
     """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
+    cur.execute('''CREATE TABLE IF NOT EXISTS MarioRatings 
+    (id INTEGER, game_name STRING, rating STRING)''')
+    cur.execute('''CREATE TABLE IF NOT EXISTS MarioReleaseDates 
+    (id INTEGER, game_name STRING, release_date STRING)''')
+    try:
+        cur.execute('SELECT * FROM MarioRatings')
+        test = len(cur.fetchall())
+        if test == 145:
+            return cur, conn
+        else:
+            error
+    except:
+        cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (1,'placeholder','_'))
+        conn.commit()
     return cur, conn
 
 def read_cache(CACHE_FNAME):
@@ -53,70 +67,63 @@ def write_cache(cache_file, cache_dict):
     fw.write(dumped_json_cache)
     fw.close()
     
-def get_mario_data():
+def get_mario_data(cur, conn):
     """
-    This function puts all the Mario data into a dictionary with each page of games as the key.
-    It will first try to get each page of up to 20 games from the cache.
-    If that page of games is already in the cache, it will request the page from the API.
-    If it has to request from the API, it will break out of the loop.
-    It returns a dictionary with the key being the page, and the value being the (up to 20) games on that page.
-    (The program will close if the dictionary this function returns does not have all 8 pages of game data.)
+    This function loads up to 20 items from the cache or API into the database.
+    It also adds a placeholder item to the database to track which page of data
+    to collect each time the code runs.
+    It takes a cursor and connection as input.
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "mario_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
     d={}
-    pages=[1,2,3,4,5,6,7,8]
+    try:
+        cur.execute('''SELECT id FROM MarioRatings WHERE game_name = "placeholder"''')
+        page = cur.fetchone()[0]
+        print("Pulling from data page below:")
+        print(page)
+        cur.execute('''DELETE FROM MarioRatings WHERE game_name = "placeholder"''')
+        conn.commit()
+    except:
+        return None
+    if page == 9:
+       return None
     headers = {'User-Agent': 'Mario Game Decade Rater','From': 'dyono@umich.edu'}
-    for x in pages:
-        try:
-            url = "https://api.rawg.io/api/games?page={}&page_size=20&search=mario&publishers=nintendo".format(x)
-            if url in CACHE_DICTION:
-                print("Getting data from the cache...")
-                d[x] = CACHE_DICTION[url]
-            else:
-                print("Requesting the data from the API...")
-                r = requests.get(url, headers=headers)
-                d[x] = json.loads(r.text)
-                CACHE_DICTION[url] = d[x]
-                write_cache(CACHE_FNAME, CACHE_DICTION)
-                break
-        except:
-            print("error when reading from url")
-            d = {}
-    return d
-
-def make_mario_database(cur, conn):
-    """
-    This function makes two database tables. It takes a cursor and connection as input.
-    One table consists of each Mario Game and its rating.
-    The other consists of each Mario Game and its release date.
-    Both tables share a primary key, the game's id number from the API.
-    """
-    # Make the table of game ratings
-    cur.execute("DROP TABLE IF EXISTS MarioRatings")
-    cur.execute('''CREATE TABLE MarioRatings 
-    (id INTEGER PRIMARY KEY, game_name STRING, rating STRING)''')
-    pages=[1,2,3,4,5,6,7,8]
-    for page in pages:
-        for x in mario[page]["results"]:
-            _id = x["id"]
-            _game_name = x["name"]
-            _rating = x["rating"]
-            cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (_id, _game_name, _rating))
-    conn.commit()
-    # Make the table of game release dates
-    cur.execute("DROP TABLE IF EXISTS MarioReleaseDates")
-    cur.execute('''CREATE TABLE MarioReleaseDates 
-    (id INTEGER PRIMARY KEY, game_name STRING, release_date STRING)''')
-    pages=[1,2,3,4,5,6,7,8]
-    for page in pages:
-        for x in mario[page]["results"]:
-            _id = x["id"]
-            _game_name = x["name"]
-            _release_date = x["released"]
-            cur.execute('INSERT INTO MarioReleaseDates (id, game_name, release_date) VALUES(?, ?, ?)', (_id, _game_name, _release_date))
-    conn.commit() 
+    try:
+        url = "https://api.rawg.io/api/games?page={}&page_size=20&search=mario&publishers=nintendo".format(page)
+        if url in CACHE_DICTION:
+            print("Getting data from the cache...")
+            d[page] = CACHE_DICTION[url]
+            for x in d[page]["results"]:
+                _id = x["id"]
+                _game_name = x["name"]
+                _rating = x["rating"]
+                _release_date = x["released"]
+                cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (_id, _game_name, _rating))
+                cur.execute('INSERT INTO MarioReleaseDates (id, game_name, release_date) VALUES(?, ?, ?)', (_id, _game_name, _release_date))
+            cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (page+1, 'placeholder', '_'))
+            conn.commit()
+            print("Wrote items to the database from the cache.")
+        else:
+            print("Requesting the data from the API...")
+            r = requests.get(url, headers=headers)
+            d[page] = json.loads(r.text)
+            CACHE_DICTION[url] = d[page]
+            write_cache(CACHE_FNAME, CACHE_DICTION)
+            for x in d[page]["results"]:
+                _id = x["id"]
+                _game_name = x["name"]
+                _rating = x["rating"]
+                _release_date = x["released"]
+                cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (_id, _game_name, _rating))
+                cur.execute('INSERT INTO MarioReleaseDates (id, game_name, release_date) VALUES(?, ?, ?)', (_id, _game_name, _release_date))
+            cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (page+1, 'placeholder', '_'))
+            conn.commit()
+            print("Wrote items to the database from the API.")
+    except:
+        print("error when reading from url")
+        d = {}
 
 def decade_rate(cur, conn):
     """
@@ -224,16 +231,23 @@ def write_to_txt(data):
 ###############
 
 print("Doing some program setup...")
-mario = get_mario_data()
-if len(mario) < 8:
-    print("""The program has written some data to the cache.
+cur, conn = setUpDatabase('videogames.db')
+mario = get_mario_data(cur, conn)
+
+# Check to see if all 145 games are in the database
+cur.execute('SELECT * FROM MarioRatings')
+tester = len(cur.fetchall())
+if tester == 146:
+    cur.execute('''DELETE FROM MarioRatings WHERE game_name = "placeholder"''')
+    # This deletes the placeholder row that tracks which page to pull data from in the get_mario_data function
+elif tester != 145:
+    print("""The program has saved some data to the database.
     We haven't collected every Mario game yet, though.
     You'll have to run the program again to collect more data.
-    When every Mario game is in the cache, we can set up the program.
+    When every Mario game is in the database, we can set up the program.
     For now, the program will exit. Thanks!""")
     quit()
-cur, conn = setUpDatabase('videogames.db')
-make_mario_database(cur, conn)
+
 data = decade_rate(cur, conn)
 
 print("""Welcome to the Mario video game decade rater.
