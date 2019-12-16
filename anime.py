@@ -9,7 +9,12 @@ import matplotlib.pyplot as plt
 
 """
 Project Members: SoJung Ham, Dylan Yono
-Information: 
+About: This program collects data from the Jikan API utilizing data from MyAnimeList.net.
+It searches for anime that aired during the fall 2019 season.
+Then, it collects the anime's rating (from MAL users) and the source material the anime is adapted from.
+The information is put into a database and the average rating of each source material is calculated.
+The program may visualize the average rating of each source material.
+The program may also write the data to a text file.
 """
 
 ############################
@@ -54,6 +59,10 @@ def write_cache(cache_file, cache_dict):
     fw.close()
     
 def get_anime_data(cur, conn):
+    """
+    This function loads up to 20 items from the cache or API into the database.
+    It takes a cursor and connection as input.
+    """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "jikan_cache.json"
     CACHE_DICTION  = read_cache(CACHE_FNAME)
@@ -102,6 +111,12 @@ def get_anime_data(cur, conn):
         quit()
 
 def best_source(cur, conn):
+    """
+    This function does all the data calculation. It takes a cursor and connection as input.
+    It cleans all the data and inputs the clean data into new tables.
+    Using the anime id, a database join selects the anime title, score, and source material.
+    It returns a list of tuples with each source and the average rating.
+    """
     # First, clean the data
     # Clean the AnimeScores table
     cur.execute('DROP TABLE IF EXISTS CleanAnimeScores')
@@ -154,6 +169,10 @@ def best_source(cur, conn):
     return score_by_source
 
 def make_chart(data):
+    """
+    This function makes a bar chart showing the average rating of anime by source material.
+    It takes the data from best_source as input and shows a graph of the data using MatPlotLib.
+    """
     names=[]
     values=[]
     for a,b in data:
@@ -162,12 +181,16 @@ def make_chart(data):
     plt.bar(names,values, color=["#016122","#392f90","#fed1b4","#9f98e6","#0aecc9","#ec4c02","#7bfc88","#3c9883","#c404ef","#df7f2b","#cd128d","#268ab6"],edgecolor="gray")
     axes = plt.gca()
     axes.set_ylim([5,8])
-    plt.ylabel('Average Rating (out of 5)')
+    plt.ylabel('Average Rating (out of 10)')
     plt.xlabel('Source Material')
     plt.suptitle('Average rating of fall 2019 anime by source material')
     plt.show()
 
 def write_to_txt(data):
+    """
+    This function takes the data from best_source as input.
+    It creates a text file of the data with each item on a new line.
+    """
     lst = []
     for x in data:
         lst.append(str(x[0]))
