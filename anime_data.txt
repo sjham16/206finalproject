@@ -1,0 +1,24 @@
+Manga
+7.320263157894736
+Novel
+7.316
+Web manga
+7.2425
+Other
+7.125
+Light novel
+7.0474999999999985
+Visual novel
+6.895
+Game
+6.491333333333334
+Picture book
+6.385
+Original
+6.221851851851853
+4-koma manga
+5.952
+Card game
+5.9399999999999995
+Music
+5.8100000000000005

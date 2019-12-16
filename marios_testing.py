@@ -40,6 +40,7 @@ def setUpDatabase(db_name):
             error
     except:
         cur.execute('INSERT INTO MarioRatings (id, game_name, rating) VALUES(?, ?, ?)', (1,'placeholder','_'))
+        conn.commit()
     return cur, conn
 
 def read_cache(CACHE_FNAME):
