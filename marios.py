@@ -232,7 +232,7 @@ def write_to_txt(data):
 
 print("Doing some program setup...")
 cur, conn = setUpDatabase('videogames.db')
-mario = get_mario_data(cur, conn)
+get_mario_data(cur, conn)
 
 # Check to see if all 145 games are in the database
 cur.execute('SELECT * FROM MarioRatings')
