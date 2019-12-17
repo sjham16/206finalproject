@@ -402,7 +402,7 @@ while userInput != 'q':
         userInput = input("Enter a number or 'q' to quit: ")
         continue
     elif userInput == '6':
-        print(createAverageSpeedGraph(cur, conn))
+        print(createAverageSpeedGraph())
         print("Cool chart, right?")
         print("Anything else you want to do?")
         userInput = input("Enter a number or 'q' to quit: ")
