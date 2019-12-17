@@ -19,6 +19,10 @@ Example: Which Pokemon type has the highest attack stat on average?
 ############################
 
 def setUpDatabase(db_name):
+    """
+    This function sets up a database.
+    It takes a filename to name the database and returns a cursor and connection.
+    """
     conn = sqlite3.connect(db_name)
     cur = conn.cursor()
     cur.execute('''CREATE TABLE IF NOT EXISTS PokemonStats (pokemon_id INTEGER, pokemon_name TEXT,
@@ -54,9 +58,10 @@ def write_cache(cache_file, cache_dict):
     fw.close() 
     
 def get_data_with_caching(cur,conn):
-    """    
     """
-    
+    This function loads up to 20 items from the cache or API into the database.
+    It takes a cursor and connection as input. 
+    """
     myDictList = []
     dir_path = os.path.dirname(os.path.realpath(__file__))
     CACHE_FNAME = dir_path + '/' + "pokemon_cache.json"
@@ -129,6 +134,11 @@ def get_data_with_caching(cur,conn):
         quit()
 
 def calculate_stats(cur, conn):
+    """
+    This function's selects all the relevant data from the tables using a database join.
+    It takes a cursor and connection as input.
+    It returns the data it selects to be used in the stat calculation functions.
+    """
     # Select the relevant data using database join
     cur.execute("""SELECT 
     PokemonStats.speed,
@@ -146,7 +156,12 @@ def calculate_stats(cur, conn):
 
 # Calculate average base stats
 
-def getAverageSpeedStats(data, pokemon_type, cur, conn):
+def getAverageSpeedStats(data, pokemon_type):
+    """
+    This function calculates the average speed stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average speed stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -156,7 +171,12 @@ def getAverageSpeedStats(data, pokemon_type, cur, conn):
     average = total/count
     return average
 
-def getAverageSpecialDefenseStats(data, pokemon_type, cur, conn):
+def getAverageSpecialDefenseStats(data, pokemon_type):
+    """
+    This function calculates the average special defense stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average special defense stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -166,7 +186,12 @@ def getAverageSpecialDefenseStats(data, pokemon_type, cur, conn):
     average = total/count
     return average
 
-def getAverageSpecialAttackStats(data, pokemon_type, cur, conn):
+def getAverageSpecialAttackStats(data, pokemon_type):
+    """
+    This function calculates the average special attack stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average special attack stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -176,7 +201,12 @@ def getAverageSpecialAttackStats(data, pokemon_type, cur, conn):
     average = total/count
     return average
 
-def getAverageDefenseStats(data, pokemon_type, cur, conn):
+def getAverageDefenseStats(data, pokemon_type):
+    """
+    This function calculates the average defense stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average defense stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -186,7 +216,12 @@ def getAverageDefenseStats(data, pokemon_type, cur, conn):
     average = total/count
     return average
 
-def getAverageAttackStats(data, pokemon_type, cur, conn):
+def getAverageAttackStats(data, pokemon_type):
+    """
+    This function calculates the average attack stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average attack stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -196,7 +231,12 @@ def getAverageAttackStats(data, pokemon_type, cur, conn):
     average = total/count
     return average
 
-def getAverageHPStats(data, pokemon_type, cur, conn):
+def getAverageHPStats(data, pokemon_type):
+    """
+    This function calculates the average hp stat for a type.
+    It takes the table data and a pokemon type as input.
+    It returns the average hp stat for pokemon of that type.
+    """
     total = 0
     count = 0
     for row in data:
@@ -210,12 +250,17 @@ def getAverageHPStats(data, pokemon_type, cur, conn):
 # Visualize data
 
 def createAverageSpeedGraph():
+    """
+    This function shows a graph of the average base speed stat for all pokemon types.
+    It calls the getAverageSpeedStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     speedStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        speedStats[_type] = getAverageSpeedStats(data, _type, cur, conn)
+        speedStats[_type] = getAverageSpeedStats(data, _type)
     plt.bar(speedStats.keys(), speedStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -225,12 +270,17 @@ def createAverageSpeedGraph():
     plt.show()
 
 def createAverageSpecialDefenseGraph():
+    """
+    This function shows a graph of the average base special defense stat for all pokemon types.
+    It calls the getAverageSpecialDefenseStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     specialDefenseStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        specialDefenseStats[_type] = getAverageSpecialDefenseStats(data, _type, cur, conn)
+        specialDefenseStats[_type] = getAverageSpecialDefenseStats(data, _type)
     plt.bar(specialDefenseStats.keys(), specialDefenseStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -240,12 +290,17 @@ def createAverageSpecialDefenseGraph():
     plt.show()
 
 def createAverageSpecialAttackGraph():
+    """
+    This function shows a graph of the average base special attack stat for all pokemon types.
+    It calls the getAverageSpecialAttackStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     specialAttackStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        specialAttackStats[_type] = getAverageSpecialAttackStats(data, _type, cur, conn)
+        specialAttackStats[_type] = getAverageSpecialAttackStats(data, _type)
     plt.bar(specialAttackStats.keys(), specialAttackStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -255,12 +310,17 @@ def createAverageSpecialAttackGraph():
     plt.show()
 
 def createAverageDefenseGraph():
+    """
+    This function shows a graph of the average base defense stat for all pokemon types.
+    It calls the getAverageDefenseStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     defenseStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        defenseStats[_type] = getAverageDefenseStats(data, _type, cur, conn)
+        defenseStats[_type] = getAverageDefenseStats(data, _type)
     plt.bar(defenseStats.keys(), defenseStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -270,12 +330,17 @@ def createAverageDefenseGraph():
     plt.show()
 
 def createAverageAttackGraph():
+    """
+    This function shows a graph of the average base attack stat for all pokemon types.
+    It calls the getAverageAttackStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     attackStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        attackStats[_type] = getAverageAttackStats(data, _type, cur, conn)
+        attackStats[_type] = getAverageAttackStats(data, _type)
     plt.bar(attackStats.keys(), attackStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -285,12 +350,17 @@ def createAverageAttackGraph():
     plt.show()
 
 def createAverageHPGraph():
+    """
+    This function shows a graph of the average base HP stat for all pokemon types.
+    It calls the getAverageHPStats function on every type.
+    It visualizes that data using matplotlib.
+    """
     data = calculate_stats(cur, conn)
     HPStats = {}
     pokemon_types = ['poison', 'grass', 'fire', 'flying', 'water', 'bug', 'normal', 'electric', 'ground', 'fairy', 'fighting', 'psychic',
             'rock', 'steel', 'ice', 'ghost', 'dragon']
     for _type in pokemon_types:
-        HPStats[_type] = getAverageHPStats(data, _type, cur, conn)
+        HPStats[_type] = getAverageHPStats(data, _type)
     plt.bar(HPStats.keys(), HPStats.values(), color=['#c300c9', 
     '#33bf00', '#d10816', '#7acdde', '#0f2f91', '#7fff08', '#c9c9c9', '#fff200', '#3d2717', '#ff96dc', 
     '#66412b', '#640485', '#9c8972', '#9c9c9c', '#c2deff', '#240959', '#0007d1'], edgecolor = "gray")
@@ -300,6 +370,9 @@ def createAverageHPGraph():
     plt.show()
 
 def write_to_csv():
+    """
+    This function creates a csv file with the average base stat calculations for each type.
+    """
     with open('pokemon_calc.csv', 'w', newline = '') as csvfile:
         fields = ['Pokemon Type', 'Average HP', 'Average Attack', 'Average Defense', 
                 'Average Special Attack','Average Special Defense', 'Average Speed']
