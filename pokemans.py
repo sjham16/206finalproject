@@ -135,7 +135,7 @@ def get_data_with_caching(cur,conn):
 
 def calculate_stats(cur, conn):
     """
-    This function's selects all the relevant data from the tables using a database join.
+    This function selects all the relevant data from the tables using a database join.
     It takes a cursor and connection as input.
     It returns the data it selects to be used in the stat calculation functions.
     """
