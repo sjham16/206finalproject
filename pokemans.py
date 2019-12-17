@@ -386,27 +386,27 @@ def write_to_csv():
 
         averageSpeeds = []
         for x in typeNames:
-            speed = getAverageSpeedStats(data, x, cur, conn)
+            speed = getAverageSpeedStats(data, x)
             averageSpeeds.append(speed)
         averageSpecialDefenses = []
         for x in typeNames:
-            special_defense = getAverageSpecialDefenseStats(data, x, cur, conn)
+            special_defense = getAverageSpecialDefenseStats(data, x)
             averageSpecialDefenses.append(special_defense)
         averageSpecialAttacks = []
         for x in typeNames:
-            special_attack = getAverageSpecialAttackStats(data, x, cur, conn)
+            special_attack = getAverageSpecialAttackStats(data, x)
             averageSpecialAttacks.append(special_attack)
         averageDefenses = []
         for x in typeNames:
-            defense = getAverageSpecialDefenseStats(data, x, cur, conn)
+            defense = getAverageSpecialDefenseStats(data, x)
             averageDefenses.append(defense)
         averageAttacks = []
         for x in typeNames:
-            attack = getAverageAttackStats(data, x, cur, conn)
+            attack = getAverageAttackStats(data, x)
             averageAttacks.append(attack)
         averageHps = []
         for x in typeNames:
-            hp = getAverageHPStats(data, x, cur, conn)
+            hp = getAverageHPStats(data, x)
             averageHps.append(hp)
 
         rows = zip(typeNames, averageSpeeds, averageSpecialDefenses, averageSpecialAttacks,
